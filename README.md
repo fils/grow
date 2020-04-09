@@ -12,7 +12,7 @@ The implementation could be improved and also I have not worked in
 any https or http 2.0 support.   I have code to support these as well
 as Let's Encrypt support so I hope to work that in.  
 
-I will also likely move from Minio client to the Go Cloud Dev client 
+I will also likely move from Minio client to the Go Cloud Dev client (ref: https://gocloud.dev/howto/blob/)
 to allow easy access to Google, MS and AWS object stores from one
 code base.  
 

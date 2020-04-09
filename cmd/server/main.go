@@ -33,7 +33,8 @@ func init() {
 	// )
 
 	flag.BoolVar(&localVal, "local", false, "Server file local over object store, false by default")
-	flag.StringVar(&s3addressVal, "s3address", "0.0.0.0:0000", "Address of the object server with port")
+	flag.StringVar(&s3addressVal, "server", "0.0.0.0:0000", "Address of the object server with port")
+	flag.StringVar(&s3bucketVal, "bucket", "website", "bucket which holds the web site objects")
 	flag.StringVar(&keyVal, "key", "config", "Object server key")
 	flag.StringVar(&secretVal, "secret", "config", "Object server secret")
 }
@@ -91,8 +92,7 @@ func vocCore(mc *minio.Client, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func minioHandler(minioClient *minio.Client,
-	f func(minioClient *minio.Client, w http.ResponseWriter, r *http.Request)) http.Handler {
+func minioHandler(minioClient *minio.Client, f func(minioClient *minio.Client, w http.ResponseWriter, r *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(minioClient, w, r) })
 }
 
