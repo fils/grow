@@ -7,13 +7,14 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gorilla/mux"
 	minio "github.com/minio/minio-go"
 )
 
-var s3addressVal, keyVal, secretVal string
+var s3addressVal, s3bucketVal, keyVal, secretVal string
 var localVal bool
 
 // MyServer is the Gorilla mux router structure
@@ -40,7 +41,16 @@ func init() {
 }
 
 func main() {
+	// parse environment vars
+	s3addressVal = os.Getenv("S3ADDRESS")
+	s3bucketVal = os.Getenv("S3BUCKET")
+	keyVal = os.Getenv("S3KEY")
+	secretVal = os.Getenv("S3SECRET")
+
+	// Parse the flags if any, will override the environment vars
 	flag.Parse() // parse any command line flags...
+
+	log.Printf("a: %s  b %s  k %s  s %s\n", s3addressVal, s3bucketVal, keyVal, secretVal)
 
 	// Need to convert this to gocloud.dev bloc (https://gocloud.dev/howto/blob/)
 	mc, err := minio.New(s3addressVal, keyVal, secretVal, false)
@@ -52,7 +62,7 @@ func main() {
 	if localVal {
 		vocroute.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./local"))))
 	} else {
-		vocroute.PathPrefix("/").Handler(http.StripPrefix("/", minioHandler(mc, vocCore)))
+		vocroute.PathPrefix("/").Handler(http.StripPrefix("/", minioHandler(mc, s3bucketVal, vocCore)))
 	}
 	vocroute.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/", &MyServer{vocroute})
@@ -65,7 +75,7 @@ func main() {
 	}
 }
 
-func vocCore(mc *minio.Client, w http.ResponseWriter, r *http.Request) {
+func vocCore(mc *minio.Client, bucket string, w http.ResponseWriter, r *http.Request) {
 	key := fmt.Sprintf("%s", r.URL.Path)
 
 	// TODO review this hack...
@@ -79,7 +89,9 @@ func vocCore(mc *minio.Client, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", m)
 	log.Printf("%s: %s \n", key, m)
 
-	fo, err := mc.GetObject("website", key, minio.GetObjectOptions{})
+	log.Printf("buket: %s", bucket)
+
+	fo, err := mc.GetObject(bucket, key, minio.GetObjectOptions{})
 	if err != nil {
 		log.Println(err)
 	}
@@ -92,8 +104,8 @@ func vocCore(mc *minio.Client, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func minioHandler(minioClient *minio.Client, f func(minioClient *minio.Client, w http.ResponseWriter, r *http.Request)) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(minioClient, w, r) })
+func minioHandler(minioClient *minio.Client, bucket string, f func(minioClient *minio.Client, bucket string, w http.ResponseWriter, r *http.Request)) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(minioClient, bucket, w, r) })
 }
 
 // MimeByType matches file extensions to mimetype
