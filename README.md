@@ -37,3 +37,6 @@ go run cmd/server/main.go -address 192.168.0.1:1234  -key mykey -secret mysecret
 
 * https://stackoverflow.com/questions/35245649/aws-s3-large-file-reverse-proxying-with-golangs-http-responsewriter
 
+## Better name..
+
+Go Resource Object Web Server (GROW Server)
