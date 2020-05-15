@@ -22,18 +22,8 @@ type UFOKNPageData struct {
 	GeoJSON string
 }
 
-// TODO
-// Need a generic /id approach here...
-
 // DO pulls the objects from the object store
 func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.Request) {
-	// First step, see what we are asked for
-	// by the extension and its mime.
-	// that will set the object search.
-	// 1) it's in the object store and is sent
-	// 2) it's not in the object store and we have a render option
-	// 3) we have no way to deal with that format
-	// Really want this to be a "route" ..   check the open core code to see if I did that there....
 
 	acpt := r.Header.Get("Accept")
 	// ref: https://play.golang.org/p/S7xCsiKe8KE
@@ -45,13 +35,6 @@ func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.
 
 	key := fmt.Sprintf("%s.jsonld", r.URL.Path) // the default for now is to look for .jsonld on this resource ID
 	object := fmt.Sprintf("%s/%s", prefix, key)
-
-	// TODO
-	// stat the object like I did..
-	// if found..  send with mimetype no templating
-	// if not found look for registered functions
-	//            if not found, format not supported
-	//            if found..  process and send
 
 	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
 	if err != nil {
@@ -115,17 +98,35 @@ func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.
 		}
 
 	} else {
-		fmt.Println("Client says it will take what I give it..  good luck with that buddy...")
 
-		// m := fileactions.MimeByType(filepath.Ext(key))
-
-		w.Header().Set("Content-Type", "application/ld+json") //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
-		n, err := io.Copy(w, fo)                              // todo need to stream write from s3 reader...  not copy
-		log.Println(n)
+		err = sendObject(w, r, fo)
 		if err != nil {
 			log.Println("Issue with writing file to http response")
 			log.Println(err)
 		}
+		/*
+			fmt.Println("Client says it will take what I give it..  good luck with that buddy...")
+
+			// m := fileactions.MimeByType(filepath.Ext(key))
+			w.Header().Set("Content-Type", "application/ld+json") //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
+
+			n, err := io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
+			log.Println(n)
+			if err != nil {
+				log.Println("Issue with writing file to http response")
+				log.Println(err)
+			}
+		*/
 	}
 
+}
+
+func sendObject(w http.ResponseWriter, r *http.Request, fo io.Reader) error {
+
+	// m := fileactions.MimeByType(filepath.Ext(key))
+	w.Header().Set("Content-Type", "application/ld+json") //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
+
+	_, err := io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
+
+	return err
 }
