@@ -7,12 +7,13 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/minio/minio-go"
+	"oceanleadership.org/grow/internal/fileactions"
+	"oceanleadership.org/grow/internal/operations"
 	"oceanleadership.org/grow/pkg/objservices/spatial"
 )
 
@@ -25,108 +26,139 @@ type UFOKNPageData struct {
 // DO pulls the objects from the object store
 func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.Request) {
 
-	acpt := r.Header.Get("Accept")
-	// ref: https://play.golang.org/p/S7xCsiKe8KE
-	objpath := r.URL.Path
-	objname := path.Base(r.URL.Path)
-	objext := path.Ext(r.URL.Path)
+	// GROW routing logic (what there is of it)
+	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
 
-	log.Printf("objpath: %s \nobjectname: %s \nobjext: %s\n", objpath, objname, objext)
-
-	key := fmt.Sprintf("%s.jsonld", r.URL.Path) // the default for now is to look for .jsonld on this resource ID
-	object := fmt.Sprintf("%s/%s", prefix, key)
-
-	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
-	if err != nil {
-		log.Println(err)
-		// TODO need to return an error here...
-	}
-
-	if strings.Contains(acpt, "text/html") {
-		fmt.Println("Client can understand html")
-		w.Header().Set("Content-Type", "text/html")
-
-		var b bytes.Buffer
-		bw := bufio.NewWriter(&b)
-
-		_, err = io.Copy(bw, fo)
-		if err != nil {
-			log.Println(err)
-		}
-
-		// Get the template from the site assets
-		// t := "assets/ufokndam.html" // TODO ..   can I get the template from the object store too?
-
-		t := fmt.Sprintf("assets/templates/%s/template.html", filepath.Dir(r.URL.Path))
-		// Read the template into a text var and parse that.
-
-		fmt.Printf("b %s  p  %s   t %s\n", bucket, prefix, t)
-
-		to, err := mc.GetObject(bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
-		if err != nil {
-			log.Println(err)
-			// TODO need to return an error here...
-		}
-
-		var tb bytes.Buffer
-		tbw := bufio.NewWriter(&tb)
-
-		_, err = io.Copy(tbw, to)
-		if err != nil {
-			log.Println(err)
-		}
-
-		tc := string(tb.Bytes())
-
-		// tc is our JSON-LD.  We not want to perform an object service on it.
-		gj, err := spatial.SDO2GeoJSON(string(b.Bytes()))
-		if err != nil {
-			log.Println(err)
-		}
-
-		pd := UFOKNPageData{JSONLD: string(b.Bytes()), GeoJSON: gj}
-
-		//ht, err := template.New("object template").ParseFiles(t) // open and parse a template text file
-		ht, err := template.New("object template").Parse(tc) // open and parse a template text file
-		if err != nil {
-			log.Printf("template parse failed: %s", err)
-		}
-
-		err = ht.ExecuteTemplate(w, "T", pd) // substitute fields in the template 't', with values from 'user' and write it out to 'w' which implements io.Writer
-		if err != nil {
-			log.Printf("htemplate execution failed: %s", err)
-		}
-
-	} else {
-
-		err = sendObject(w, r, fo)
-		if err != nil {
-			log.Println("Issue with writing file to http response")
-			log.Println(err)
-		}
-		/*
-			fmt.Println("Client says it will take what I give it..  good luck with that buddy...")
-
-			// m := fileactions.MimeByType(filepath.Ext(key))
-			w.Header().Set("Content-Type", "application/ld+json") //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
-
-			n, err := io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
-			log.Println(n)
+	if acptHTML {
+		ext := filepath.Ext(r.URL.Path)
+		if ext == "" || ext == ".jsonld" || ext == ".html" {
+			s := strings.TrimSuffix(r.URL.Path, ext)
+			object := fmt.Sprintf("%s/%s.jsonld", prefix, s)
+			err := sendHTML(mc, w, r, bucket, object, prefix)
 			if err != nil {
-				log.Println("Issue with writing file to http response")
 				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
 			}
-		*/
+		} else {
+			log.Printf("Unsupported media type request, in the future I will check function map\n")
+			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType),
+				http.StatusUnsupportedMediaType)
+		}
+	} else {
+		// We are not HTML at this point, so we might be sending an object
+		// or attempting to render a representation of one.
+		// 1) check if the object exist and send it.
+		// 2) if does not exist, check if the ext matches a render version
+
+		object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
+
+		_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+		// fmt.Println(objInfo)
+
+		if err != nil {
+			// we don't see this object by the provided object name, so
+			// let's see if the extension/mimetype can be rendered
+			ext := filepath.Ext(object)
+
+			if strings.Contains(ext, ".geojson") {
+				err := operations.TypeGeoJSON(mc, w, r, bucket, object)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, http.StatusText(http.StatusNotFound),
+						http.StatusNotFound)
+				}
+			} else {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound),
+					http.StatusNotFound)
+			}
+		} else {
+			err = sendObject(mc, w, r, bucket, object)
+			if err != nil {
+				log.Println(err)
+				// not found is unlikely given the stat call above..  this
+				// likely is only released via internal server error
+				http.Error(w, http.StatusText(http.StatusNotFound),
+					http.StatusNotFound)
+			}
+		}
 	}
 
 }
 
-func sendObject(w http.ResponseWriter, r *http.Request, fo io.Reader) error {
+func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object, prefix string) error {
+	fmt.Println("Client can understand html")
+	w.Header().Set("Content-Type", "text/html")
+
+	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
+	if err != nil {
+		return err
+	}
+
+	var b bytes.Buffer
+	bw := bufio.NewWriter(&b)
+
+	_, err = io.Copy(bw, fo)
+	if err != nil {
+		return err
+	}
+
+	// Get the template from the site assets
+	t := fmt.Sprintf("assets/templates/%s/template.html", filepath.Dir(r.URL.Path))
+	to, err := mc.GetObject(bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
+	if err != nil {
+		return err
+	}
+
+	var tb bytes.Buffer
+	tbw := bufio.NewWriter(&tb)
+
+	_, err = io.Copy(tbw, to)
+	if err != nil {
+		return err
+	}
+
+	tc := string(tb.Bytes())
+
+	// tc is our JSON-LD.  We not want to perform an object service on it.
+	gj, err := spatial.SDO2GeoJSON(string(b.Bytes()))
+	if err != nil {
+		return err
+	}
+
+	pd := UFOKNPageData{JSONLD: string(b.Bytes()), GeoJSON: gj}
+
+	//ht, err := template.New("object template").ParseFiles(t) // open and parse a template text file
+	ht, err := template.New("object template").Parse(tc) // open and parse a template text file
+	if err != nil {
+		return err
+	}
+
+	err = ht.ExecuteTemplate(w, "T", pd) // substitute fields in the template 't', with values from 'user' and write it out to 'w' which implements io.Writer
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func sendObject(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object string) error {
+
+	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
+	if err != nil {
+		return err
+	}
+
+	ext := filepath.Ext(object)
+
+	log.Println(ext)
+	mime := fileactions.MimeByType(ext)
 
 	// m := fileactions.MimeByType(filepath.Ext(key))
-	w.Header().Set("Content-Type", "application/ld+json") //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
+	w.Header().Set("Content-Type", mime) //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
 
-	_, err := io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
+	_, err = io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
 
 	return err
 }

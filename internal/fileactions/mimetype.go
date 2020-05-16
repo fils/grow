@@ -2,6 +2,7 @@ package fileactions
 
 import (
 	"mime"
+	"strings"
 	"net/http"
 	"os"
 )
@@ -11,6 +12,11 @@ func MimeByType(e string) string {
 	t := mime.TypeByExtension(e)
 	if t == "" {
 		t = "application/octet-stream"
+	}
+
+	// Go library doesn't have .jsonld
+	if strings.Contains(e, ".jsonld") {
+		t = "application/ld+json"
 	}
 	return t
 }
