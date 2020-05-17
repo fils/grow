@@ -14,12 +14,12 @@ import (
 	"github.com/minio/minio-go"
 	"oceanleadership.org/grow/internal/fileactions"
 	"oceanleadership.org/grow/internal/operations"
-	"oceanleadership.org/grow/pkg/objservices/spatial"
 )
 
 // UFOKNPageData is the struct for the template page
 type UFOKNPageData struct {
 	JSONLD  string
+	PID     string
 	GeoJSON string
 }
 
@@ -121,13 +121,8 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 
 	tc := string(tb.Bytes())
 
-	// tc is our JSON-LD.  We not want to perform an object service on it.
-	gj, err := spatial.SDO2GeoJSON(string(b.Bytes()))
-	if err != nil {
-		return err
-	}
-
-	pd := UFOKNPageData{JSONLD: string(b.Bytes()), GeoJSON: gj}
+	log.Println(object)
+	pd := UFOKNPageData{JSONLD: string(b.Bytes()), PID: object}
 
 	//ht, err := template.New("object template").ParseFiles(t) // open and parse a template text file
 	ht, err := template.New("object template").Parse(tc) // open and parse a template text file
