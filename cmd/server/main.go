@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"oceanleadership.org/grow/internal/digitalobjects"
 	"oceanleadership.org/grow/internal/fileobjects"
 
 	"github.com/gorilla/mux"
@@ -22,14 +23,6 @@ type MyServer struct {
 
 func init() {
 	log.SetFlags(log.Lshortfile)
-	// log.SetOutput(ioutil.Discard) // turn off all logging
-
-	// Place holder for logging to buffer..   could use this later for
-	// writing logs to Minio.  Perhaps useless if fronting with traefik.
-	// var (
-	//      buf    bytes.Buffer
-	//      logger = log.New(&buf, "logger: ", log.Lshortfile)
-	// )
 
 	flag.BoolVar(&localVal, "local", false, "Server file local over object store, false by default")
 	flag.StringVar(&s3addressVal, "server", "0.0.0.0:0000", "Address of the object server with port")
@@ -57,7 +50,13 @@ func main() {
 		log.Println(err)
 	}
 
-	// dr  default route
+	// Handler doc:   addresses the /id/* request path
+	doc := mux.NewRouter()
+	doc.PathPrefix("/id/").Handler(http.StripPrefix("/id/", minioHandler(mc, s3bucketVal, s3prefixVal, digitalobjects.DO)))
+	doc.NotFoundHandler = http.HandlerFunc(notFound)
+	http.Handle("/id/", &MyServer{doc})
+
+	// Handler dr:   addresses the / request path
 	dr := mux.NewRouter()
 	if localVal {
 		dr.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./local"))))
@@ -82,7 +81,6 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 func minioHandler(minioClient *minio.Client, bucket, prefix string, f func(minioClient *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(minioClient, bucket, prefix, w, r) })
 }
-
 func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")

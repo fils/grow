@@ -1,10 +1,10 @@
 BINARY := server
-GROUP := ufoknorg
+GROUP := basic
 DOCKERVER :=`/bin/cat VERSION`
 .DEFAULT_GOAL := linux
 
 linux:
-		cd cmd/$(GROUP) ; \
+		cd cmd/$(BINARY) ; \
 		GOOS=linux GOARCH=amd64 CGO_ENABLED=0 env go build -o $(BINARY)
 
 docker:
@@ -24,4 +24,3 @@ publishgcr:
 	docker push gcr.io/top-operand-112611/grow-$(GROUP):$(DOCKERVER)
 
 togcr: linux docker tag publishgcr
-tohub: linux docker dockerlatest publish

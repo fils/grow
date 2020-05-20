@@ -1,4 +1,4 @@
-package ufoknorg
+package digitalobjects
 
 import (
 	"bufio"
@@ -61,8 +61,27 @@ func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.
 			// let's see if the extension/mimetype can be rendered
 			ext := filepath.Ext(object)
 
+			// TODO recode the if else if to a switch statement?
+			// 	switch ext {
+			// 	case ".geojson":
+			// 		err := operations.TypeGeoJSON(mc, w, r, bucket, object)
+			// 		if err != nil {
+			// 			log.Println(err)
+			// 			http.Error(w, http.StatusText(http.StatusNotFound),
+			// 				http.StatusNotFound)
+			// 		}
+			// case "":
+
 			if strings.Contains(ext, ".geojson") {
 				err := operations.TypeGeoJSON(mc, w, r, bucket, object)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, http.StatusText(http.StatusNotFound),
+						http.StatusNotFound)
+				}
+			} else if strings.Contains(ext, "") {
+				jldobj := fmt.Sprintf("%s.jsonld", object)
+				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {
 					log.Println(err)
 					http.Error(w, http.StatusText(http.StatusNotFound),

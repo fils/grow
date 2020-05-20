@@ -33,7 +33,8 @@ func ProcOpts() (*ld.JsonLdProcessor, *ld.JsonLdOptions) { // TODO make a bookle
 	// }
 
 	m := make(map[string]string)
-	m["http://schema.org/"] = "/context/jsonldcontext.json"
+	m["http://schema.org/"] = "./context/jsonldcontext.jsonld"
+	m["https://schema.org/"] = "./context/jsonldcontext.jsonld"
 
 	// for i := range s {
 	// 	if fileExists(s[i].File) {
