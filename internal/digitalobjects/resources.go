@@ -24,7 +24,7 @@ type UFOKNPageData struct {
 }
 
 // DO pulls the objects from the object store
-func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.Request) {
+func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
 
 	// GROW routing logic (what there is of it)
 	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
@@ -79,7 +79,7 @@ func DO(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.
 					http.Error(w, http.StatusText(http.StatusNotFound),
 						http.StatusNotFound)
 				}
-			} else if strings.Contains(ext, "") {
+			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists
 				jldobj := fmt.Sprintf("%s.jsonld", object)
 				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {

@@ -13,7 +13,7 @@ import (
 )
 
 // FileObjects pulls the objects from the object store
-func FileObjects(mc *minio.Client, bucket, prefix string, w http.ResponseWriter, r *http.Request) {
+func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
 	var object string
 	key := fmt.Sprintf("%s", r.URL.Path)
 

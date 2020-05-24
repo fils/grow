@@ -51,7 +51,7 @@ var htmlonly bool
 func init() {
 	log.SetFlags(log.Lshortfile)
 
-	flag.BoolVar(&htmlonly, "htmlonly", false, "Require sitemap entries end in .html")
+	//flag.BoolVar(&htmlonly, "htmlonly", false, "Require sitemap entries end in .html")
 
 	flag.StringVar(&urlprefix, "urlprefix", "https://example.org/", "URL prefix for the sitemap")
 	flag.StringVar(&s3addressVal, "server", "0.0.0.0:0000", "Address of the object server with port")
@@ -72,24 +72,17 @@ func main() {
 	keyVal = os.Getenv("S3KEY")
 	secretVal = os.Getenv("S3SECRET")
 
-	// Parse the flags if any, will override the environment vars
 	flag.Parse() // parse any command line flags...
 	log.Printf("uL %s a: %s  b %s  p %s  k %s  s %s\n", urlprefix, s3addressVal, s3bucketVal, s3prefixVal, keyVal, secretVal)
 
-	// TODO make the s3Maker and then time both of these
 	start := time.Now()
-	s3Maker(urlprefix, s3addressVal, s3bucketVal, s3prefixVal, keyVal, secretVal, htmlonly)
+	s3Maker(urlprefix, s3addressVal, s3bucketVal, s3prefixVal, keyVal, secretVal)
 	elapsed := time.Since(start)
 	log.Printf("s3Maker took %s", elapsed)
 
-	// start = time.Now()
-	// kvMaker()
-	// elapsed = time.Since(start)
-	// log.Printf("kvMaker took %s", elapsed)
-
 }
 
-func s3Maker(prefix, server, bucket, objPrefix, key, secret string, htmlonly bool) {
+func s3Maker(prefix, server, bucket, objPrefix, key, secret string) {
 	mc := minioConnection(server, "80", key, secret)
 
 	// Create a done channel.
@@ -121,10 +114,10 @@ func s3Maker(prefix, server, bucket, objPrefix, key, secret string, htmlonly boo
 		}
 
 		if c > 40000 {
-			fmt.Println(c)
+			// fmt.Println(c)
 			c = 0
 			saveto := fmt.Sprintf("./output/sitemap_%d_%s.xml", c2, objPrefix)
-			a = append(a, saveto)
+			a = append(a, strings.TrimPrefix(saveto, "./output/"))
 			c2 = c2 + 1
 			f, err := os.Create(saveto)
 			if err != nil {
@@ -133,24 +126,26 @@ func s3Maker(prefix, server, bucket, objPrefix, key, secret string, htmlonly boo
 			sm.WriteTo(f)
 			sm = sitemap.New()
 		}
-
 	}
 
 	// need to save the last few in the loop
 	saveto := fmt.Sprintf("./output/sitemap_%d_%s.xml", c2, objPrefix)
-	a = append(a, saveto)
+	a = append(a, strings.TrimPrefix(saveto, "./output/"))
 	f, err := os.Create(saveto)
 	if err != nil {
 		log.Println(err)
 	}
+
+	// var b bytes.Buffer
+	// foo := bufio.NewWriter(&b)
+	// sm.WriteTo(foo)
+	// write to minio now...
+
 	sm.WriteTo(f)
 
-	log.Println(a)
-
 	smi := sitemap.NewSitemapIndex()
-
 	for x := range a {
-		smi.Add(&sitemap.URL{Loc: fmt.Sprintf("%s/%s", prefix, a[x])})
+		smi.Add(&sitemap.URL{Loc: fmt.Sprintf("%s%s", prefix, a[x])})
 	}
 
 	saveto = fmt.Sprint("./output/sitemap.xml")
@@ -159,7 +154,6 @@ func s3Maker(prefix, server, bucket, objPrefix, key, secret string, htmlonly boo
 		log.Println(err)
 	}
 	smi.WriteTo(f)
-
 }
 
 func minioConnection(minioVal, portVal, accessVal, secretVal string) *minio.Client {
