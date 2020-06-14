@@ -48,7 +48,14 @@ func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWrite
 
 	go builder(bucket, prefix, domain, mc)
 
-	// TODO need to write back a 202 Accepted
+	// TODO
+	//  1) make PID
+	//  2) write a files with the pid to /id/queue
+	//  3) send of go func (let it know the PID)
+	//  3.5) send 202 Accepted, location /id/queue/1234 (request is 200 with info about job)
+	//  4) When go fun is done ned to make /id/queue/1234  303 with link to new resournce made
+	//  use the content of the /id/queue/1234 to tell if this is a 200 report or 303 redirect
+	//  How to delete the queue (if to delete it) needs to be resolved.
 }
 
 func builder(bucket, prefix, domain string, mc *minio.Client) {

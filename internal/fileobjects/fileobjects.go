@@ -26,11 +26,11 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 
 	m := fileactions.MimeByType(filepath.Ext(key))
 	w.Header().Set("Content-Type", m)
-	// log.Printf("%s: %s \n", key, m)
+	log.Printf("%s: %s \n", key, m)
 
 	object = fmt.Sprintf("%s/website/%s", prefix, key)
 
-	// log.Println(object)
+	log.Println(object)
 
 	// check our object is there first....
 	_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})

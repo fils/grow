@@ -33,7 +33,8 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		ext := filepath.Ext(r.URL.Path)
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
 			s := strings.TrimSuffix(r.URL.Path, ext)
-			object := fmt.Sprintf("%s/%s.jsonld", prefix, s)
+			object := fmt.Sprintf("%s/%s.jsonld", prefix, s) // if prefex is nill?
+			log.Printf("b: %s o: %s p:%s ", bucket, object, prefix)
 			err := sendHTML(mc, w, r, bucket, object, prefix)
 			if err != nil {
 				log.Println(err)
@@ -125,6 +126,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 
 	// Get the template from the site assets
 	t := fmt.Sprintf("assets/templates/%s/template.html", filepath.Dir(r.URL.Path))
+	log.Println(filepath.Dir(r.URL.Path))
 	to, err := mc.GetObject(bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
 	if err != nil {
 		return err
