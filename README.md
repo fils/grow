@@ -40,3 +40,6 @@ go run cmd/server/main.go -address 192.168.0.1:1234  -key mykey -secret mysecret
 ## Better name..
 
 Go Resource Object Web Server (GROW Server)
+
+Generic Resource Object Web
+
