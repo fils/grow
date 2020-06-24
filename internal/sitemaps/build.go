@@ -48,13 +48,17 @@ func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWrite
 
 	go builder(bucket, prefix, domain, mc)
 
-	// TODO
-	//  1) make PID
-	//  2) write a files with the pid to /id/queue
-	//  3) send of go func (let it know the PID)
-	//  3.5) send 202 Accepted, location /id/queue/1234 (request is 200 with info about job)
-	//  4) When go fun is done ned to make /id/queue/1234  303 with link to new resournce made
-	//  use the content of the /id/queue/1234 to tell if this is a 200 report or 303 redirect
+	// TODO   // ? https://schema.org/CreateAction https://schema.org/docs/actions.html
+	// POST a request JSON body to /api/sitemap
+	// make PID
+	// Make a JSON status document in /id/queue/[PID].json
+	// send of go func (let it know the PID)
+	// send 202 Accepted, location /id/queue/[PID] (any FET request to resource is 200 with info about job)
+	// When go fun is done ned to make /id/queue/[PID]  303 with link to new resournce made,
+	// rewrite the doc with a new status entry?
+
+	//  use the presence of /id/queue/[PID]  to tell if this is a 200 report or 303 redirect
+	// PID.json is the metadata for PID
 	//  How to delete the queue (if to delete it) needs to be resolved.
 }
 
