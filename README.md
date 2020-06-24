@@ -1,45 +1,72 @@
-# Go Object Web
+# Generic Resource Object Web (GROW)
 
 ## about
 
-This is a simple proof of concept program.  It is a Go based program
-that is just a simple web server.  The only unique element is that I 
-use minio (s3) as a storage for the files.
+This is a simple proof of concept program.  
+It is a Go based program that serves objects.  These objects 
+come from an S3 API object store.  It can use the open source Minio 
+S3 backend or any of the AWS, Google Cloud or Azure object storage 
+services.   I've tested this mostly on Docker Swarm and Google Cloud Run.
+
+> Note:  GROW is a very simplist object server.  For a more sophisticate
+> solution with far more features try Clouder. (https://clowder.ncsa.illinois.edu/)
+
+GROW leverages the RDA Digital Object Cloud pattern and is a basic implementation 
+of that pattern.   
 
 ## future
 
-The implementation could be improved and also I have not worked in 
-any https or http 2.0 support.   I have code to support these as well
-as Let's Encrypt support so I hope to work that in.  
-
-I will also likely move from Minio client to the Go Cloud Dev client (ref: https://gocloud.dev/howto/blob/)
+I will likely move from Minio client to the Go Cloud Dev client (ref: https://gocloud.dev/howto/blob/)
 to allow easy access to Google, MS and AWS object stores from one
 code base.  
 
-The other goal would be ensure I can docker-ize this and deploy
-to something like Google Cloud Run or Amazon ECS.  
+A basic set of APIs exist that can be invoked to perform two functions:
+
+* Build a sitemap of the objects (leverages sitemap indexes for > 50K object counts)
+* Build an RDF graph based on converting stored JSON-LD objects into a single NQuads RDF file.  
+
+I'll add in object store triggers to call web hooks to peform workflows on addedd objects.
 
 ## commands
 
-I will soon work this up as a Docker system and use the viper config
-pattern.  It will run by default looking for the config file which 
-can be loaded into the docker image.  
-
-I will also keep the command line option for testing and I need 
-to activate the local file source option via flag too.
+GROW can be run from the command line for Docker.
 
 example command line with object store option 
 ```bash
-go run cmd/server/main.go -address 192.168.0.1:1234  -key mykey -secret mysecret
+go run cmd/server/main.go -domain "https://example.org" -server 192.168.86.45:1234 
+-bucket sites -prefix siteprefix -key mykey -secret mysecret
 ```
 
-## refs
+The elements are:
 
-* https://stackoverflow.com/questions/35245649/aws-s3-large-file-reverse-proxying-with-golangs-http-responsewriter
+domain: Your sites domain (needed when generating sitemaps)
 
-## Better name..
+server: The address for the object storage such as Minio
 
-Go Resource Object Web Server (GROW Server)
+bucket: The bucket your object tree is stored in
 
-Generic Resource Object Web
+prefix:  Optional prefix for your object tree root
+
+key:  Object store key
+
+secret: Object store secret
+
+
+On Docker this would look like:
+
+```Docker
+    image: fils/grow-general:latest
+    environment:
+      - S3ADDRESS=s3system:9000
+      - S3BUCKET=sites
+      - S3PREFIX=siteprefix
+      - DOMAIN=https://examples.org/
+      - S3KEY=mykey
+      - S3SECRET=mysecret
+    labels:
+    ...
+    networks:
+      - traefik_default
+
+```
 

@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"oceanleadership.org/grow/internal/api/graph"
+	"oceanleadership.org/grow/internal/api/sitemaps"
 	"oceanleadership.org/grow/internal/digitalobjects"
 	"oceanleadership.org/grow/internal/fileobjects"
-	"oceanleadership.org/grow/internal/sitemaps"
 
 	"github.com/gorilla/mux"
 	minio "github.com/minio/minio-go"
@@ -55,7 +56,9 @@ func main() {
 
 	// Handler sm:   builds sitemaps
 	sm := mux.NewRouter()
-	sm.PathPrefix("/api/").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, sitemaps.Build)))
+	sm.PathPrefix("/api/sitemap").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, sitemaps.Build)))
+	sm.PathPrefix("/api/graph").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, graph.Build)))
+
 	sm.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/api/", &MyServer{sm})
 
