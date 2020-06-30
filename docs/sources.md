@@ -3,7 +3,7 @@
 ## Intro
 
 While GROW is focused on a _document_ based approach that doesn't mean that it 
-cant not be used in with approach approaches.  The following sections will touch 
+cant not be used in with other approaches.  The following sections will touch 
 on two of these; structured data files and relational databases (SQL).
 
 These approaches are NOT in GROW at this time.  However, they were known directions 
