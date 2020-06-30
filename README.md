@@ -16,7 +16,7 @@ services.   I've tested this mostly on Docker Swarm and Google Cloud Run.
 GROW leverages the RDA Digital Object Cloud pattern and is a basic implementation 
 of that pattern.
 
-For more details visit [the about page.](./docs/about.html)
+For more details visit [the about page.](./docs/about.md)
 
 
 
