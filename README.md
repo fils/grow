@@ -1,3 +1,5 @@
+![GitHub Logo](./docs/images/growShield.png)
+
 # Generic Resource Object Web (GROW)
 
 ## about
@@ -13,6 +15,9 @@ services.   I've tested this mostly on Docker Swarm and Google Cloud Run.
 
 GROW leverages the RDA Digital Object Cloud pattern and is a basic implementation 
 of that pattern.   
+
+
+![GitHub Logo](./docs/images/objectChain.png)
 
 ## future
 

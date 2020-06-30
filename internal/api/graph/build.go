@@ -36,6 +36,7 @@ func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWrite
 }
 
 func builder(bucket, prefix, domain string, mc *minio.Client) {
+	log.Println("Builder call started")
 
 	// Create a done channel.
 	doneCh := make(chan struct{})
@@ -103,7 +104,7 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 	pw.Close()
 	pr.Close()
 
-	fmt.Println("Builder call done")
+	log.Println("Builder call done")
 
 }
 

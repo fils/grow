@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"oceanleadership.org/grow/internal/fileactions"
 
@@ -17,11 +18,14 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	var object string
 	key := fmt.Sprintf("%s", r.URL.Path)
 
+	log.Println(key)
+
 	// TODO review this hack...
-	// the browser rewrites /index.html to / and this of course fails to locate the object.
-	// So for the one case of index.html (.htm ?) we need to do this hack
-	if key == "" { // deal with browser index.html rewrites and sub directories!!!
+	if key == "" {
 		key = "index.html"
+	}
+	if strings.HasSuffix(key, "/") {
+		key = key + "index.html"
 	}
 
 	m := fileactions.MimeByType(filepath.Ext(key))
