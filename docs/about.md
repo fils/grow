@@ -127,10 +127,9 @@ a few examples.
 
 A example:
 
-| URL                           |   Bucket                  |
-| ------------------------------| --------------------------|
-| ```https://example.org/id/artifact/gaurdianofforever```|```/mybucket/artifact/gaurdianofforever```     |
-
+| URL                                                     | Object (Bucket +  Prefix)                  |
+|---------------------------------------------------------|--------------------------------------------|
+| ```https://example.org/id/artifact/gaurdianofforever``` | ```/mybucket/artifact/gaurdianofforever``` |
 
 You will note we didn't map the ID name.  This was due to the fact we wanted
 people to be able to set their own prefix and also a few other routing thoughts.
