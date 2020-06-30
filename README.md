@@ -14,23 +14,14 @@ services.   I've tested this mostly on Docker Swarm and Google Cloud Run.
 > solution with far more features try Clouder. (https://clowder.ncsa.illinois.edu/)
 
 GROW leverages the RDA Digital Object Cloud pattern and is a basic implementation 
-of that pattern.   
+of that pattern.
+
+For more details visit [the about page.](./docs/about.html)
 
 
-![GitHub Logo](./docs/images/objectChain.png)
 
-## future
+![GitHub Logo](./docs/images/objecChain.png)
 
-I will likely move from Minio client to the Go Cloud Dev client (ref: https://gocloud.dev/howto/blob/)
-to allow easy access to Google, MS and AWS object stores from one
-code base.  
-
-A basic set of APIs exist that can be invoked to perform two functions:
-
-* Build a sitemap of the objects (leverages sitemap indexes for > 50K object counts)
-* Build an RDF graph based on converting stored JSON-LD objects into a single NQuads RDF file.  
-
-I'll add in object store triggers to call web hooks to peform workflows on addedd objects.
 
 ## commands
 
@@ -44,6 +35,7 @@ go run cmd/server/main.go -domain "https://example.org" -server 192.168.86.45:12
 
 The elements are:
 
+```
 domain: Your sites domain (needed when generating sitemaps)
 
 server: The address for the object storage such as Minio
@@ -55,7 +47,7 @@ prefix:  Optional prefix for your object tree root
 key:  Object store key
 
 secret: Object store secret
-
+```
 
 On Docker this would look like:
 
