@@ -57,3 +57,11 @@ describe it.
 
 * http://wiki.esipfed.org/index.php/Interagency_Data_Stewardship/Citations/provider_guidelines 
 * https://commons.esipfed.org/node/7980 
+
+## Other
+
+Though out of scope right now it's possible to view this approach backed by other 
+systems such as;
+
+* MongoDB:  A document store
+* IPFS: Distributed file system.  More of a thought experiment for now. 

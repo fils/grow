@@ -1,23 +1,31 @@
 # GROW
 
-
 ## Summary
-GROW stands for "Generic Resource on the Web", succinctly, it is a web server
-that leverages object storage. 
 
-* GROW uses an object store system that implements the S3 API (So Minio, Google Cloud, AWS, etc)
-* GROW maps these objects to URL patterns and maps negotiated content formats to the objects and 
-also functions in or linked to GROW
+GROW stands for "Generic Resource on the Web", succinctly, it is a web server
+that leverages object storage.
+
+This process is analogous to things like content managements systems
+(especially headless) or even classic web servers serving a
+directory of files.
+
+![simple](./images/simple.png)
+
+A few basic points about FROW:
+
+* GROW uses any object store system that implements the S3 API 
+(So Minio, Google Cloud, AWS, etc)
+* GROW maps these objects to URL patterns and maps negotiated content formats to the
+ objects and also functions in or linked to GROW
 * GROW is a single binary, easily containerized and cloud ready
 
-![GitHub Logo](./images/objecChain.png)
-
+![ObjectChain](./images/objecChain.png)
 
 ## Why GROW
 
 There is actually nothing overly special about
-GROW's approach. The approach could and has been implemented in other environments.   So
-what made GROW unique enough to be worth coding?
+GROW's approach. The approach could and has been implemented in other environments.
+So what made GROW unique enough to be worth coding?
 
 A few things:
 
@@ -25,7 +33,7 @@ A few things:
   server focused on serving digital objects.
 * GROW also implements structured data on the web approaches.  Specifically,
   including JSON-LD data graphs in landing pages associated with a digital
-  object. 
+  object.
 * GROW can interpret potential "affordances for resources" .  Here,
   "affordances" means operations the digital object could satisfy.  This is
   mostly just content negotiation extended to include those content formats that
@@ -36,7 +44,7 @@ A few things:
   resources can satisfy.  
 * As noted above, negotiated views can be optionally dynamic or static.  Either
   code functions that compute and send the results, or results pre-computed and
-  available in the object store. 
+  available in the object store.
 * GROW was also designed to optimize indexing over the web in support of
   structured data on the web.  So it is highly concurrent and designed to
   operate at high sustained loads.  Coupled with an http 2.0 aware proxy (like
@@ -53,7 +61,7 @@ work.
 ![GitHub Logo](./images/rdadoc.png)
 
 
-## Principle of Project
+## Principles over Project
 
 As noted, this approach could be replicated in other
 environments.  Most of what is expressed by GROW are patterns and principles.
@@ -332,10 +340,10 @@ A: I know..  I thought of that at the start..   but who is doing that?   It
 seems wonderful in the "logic" space but a pain in the ass in the user space
 where my clients now need to be 303 aware for loading resources in notebooks
 etc.   I choose to make one camp happy over another since it seemed unlikely
-either could be equally happy. 
+either could be equally happy.
 
-Q: What if my Digital Object is only one file? There is no associated metada
-(.jsonld) or my file is a .jsonld? 
+Q: What if my Digital Object is only one file? There is no associated metadata
+(.jsonld) or my file is a .jsonld?
 
 A: Then your file is resolved directly as
 either file.EXT or file. If it is not file.jsonld, it would be sent directly as
