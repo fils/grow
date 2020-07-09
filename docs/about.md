@@ -11,7 +11,7 @@ directory of files.
 
 ![simple](./images/simple.png)
 
-A few basic points about FROW:
+A few basic points about GROW:
 
 * GROW uses any object store system that implements the S3 API 
 (So Minio, Google Cloud, AWS, etc)
