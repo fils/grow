@@ -2,6 +2,8 @@ package digitalobjects
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	"log"
 	"mime"
 	"net/http"
@@ -29,5 +31,25 @@ func Service(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWri
 	}
 	log.Printf("%s %s %s %s %s %s ", acpt, object, ext, mt, base, baseobj)
 
-	fmt.Fprintf(w, "hello world")
+	// Just a test POST call for now
+	var client http.Client // why do I make this here..  can I use 1 client?  move up in the loop
+	urlloc := "https://postman-echo.com/post"
+	req, err := http.NewRequest("POST", urlloc, nil)
+	if err != nil {
+		log.Printf("#error on %s : %s  ", urlloc, err) // print an message containing the index (won't keep order)
+	}
+	req.Header.Set("User-Agent", "EarthCube_DataBot/1.0")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("#error on %s : %s  ", urlloc, err) // print an message containing the index (won't keep order)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Print(err)
+	}
+
+	fmt.Fprintf(w, string(body))
 }

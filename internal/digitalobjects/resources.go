@@ -114,8 +114,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {
 					log.Println(err)
-					http.Error(w, http.StatusText(http.StatusNotFound),
-						http.StatusNotFound)
+					http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 				}
 			} else {
 				log.Println(err)
