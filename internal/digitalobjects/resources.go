@@ -27,7 +27,6 @@ type UFOKNPageData struct {
 // DO pulls the objects from the object store.  At present this function
 // container the routing logic.
 func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
-
 	// collect the information we need for routing resolution
 	// at this time I am collecting a lot..   we may not need all of this
 	object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
@@ -42,9 +41,21 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 	} else {
 		log.Println(objInfo)
 	}
+
+	// WARNING Hackish hard coding for testing....
+	// see if baseobj maps to a service ID
+	log.Printf("/assets/services/%s.jsonld", baseobj)
+	serviceInfo, err := mc.StatObject(bucket, fmt.Sprintf("%s/assets/services/%s.jsonld", prefix, baseobj), minio.StatObjectOptions{})
+	if err != nil {
+		log.Print(err)
+	} else {
+		log.Println(serviceInfo)
+	}
+
 	log.Printf("%s %s %s %s %s %s ", acpt, object, ext, mt, base, baseobj)
 
 	// First deal with requests that are looking for HTML via the ACCEPT header
+	// assume they want a landing page represenation of the DO
 	if strings.Contains(acpt, "text/html") {
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
 			s := strings.TrimSuffix(r.URL.Path, ext)
@@ -74,28 +85,19 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 
 		// If the OBJECT DOES NOT seem to exist
 		if err != nil {
-			// we don't see this object by the provided object name, so
-			// let's see if the extension/mimetype can be rendered
+			// TODO Eval switch statementi vs if else if
 
-			// TODO use switch statementi over if else if?
-			// 	switch ext {
-			// 	case ".geojson":
-			// 		err := operations.TypeGeoJSON(mc, w, r, bucket, object)
-			// 		if err != nil {
-			// 			log.Println(err)
-			// 			http.Error(w, http.StatusText(http.StatusNotFound),
-			// 				http.StatusNotFound)
-			// 		}
-			// case "":
-
-			// service call branch test
+			// TODO service call branch test
 			// need (base object name (no ext), ext and mimetype we have, requested mimetype,  map of external services and mime they op on)
 
 			// affordance check (look for services that do something..   likely reported in a HEAD call for the like)
 
-			// invoker send an object to a service and await the outcome
-			// invoke(urlToPOSTTo, object_orObjectBytesToSend, reqAcceptString, respAcceptString) // optionsla JSON:API package?
-			// urlToPOSTTo comes from id/do/DO/SERVICE  ..  SERVICE pulled to lookup info from
+			// What do we need to know?
+			// in /id/do/p1/p2/p3
+			// is p3 a serviceID?  this is the base...  which is either a service id or the end of an object prefix string
+			// or is p3 the end of the object name with several prefixes (prefixi?)
+
+			// invoke(serviceObject, targetObject) // optionsla JSON:API package?
 			// services are in /assets/services  need a func to parse and select from these...
 			// json-ld flatten  -> look for type action -> get entrypoint and grab the template, method and type
 

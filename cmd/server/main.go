@@ -58,12 +58,14 @@ func main() {
 	sm := mux.NewRouter()
 	sm.PathPrefix("/api/sitemap").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, sitemaps.Build)))
 	sm.PathPrefix("/api/graph").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, graph.Build)))
-
 	sm.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/api/", &MyServer{sm})
 
 	// Handler doc:   addresses the /id/* request path
 	doc := mux.NewRouter()
+	// doc.Handle wont work...   I don't know what my object prefix, so I don't know is the last item
+	// is a service or the end of the DO path
+	//doc.Handle("/id/{DO}/{ID}/{SERVICE}", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, digitalobjects.Service))
 	doc.PathPrefix("/id/").Handler(http.StripPrefix("/id/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, digitalobjects.DO)))
 	doc.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/id/", &MyServer{doc})
