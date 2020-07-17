@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -23,14 +24,28 @@ type UFOKNPageData struct {
 	GeoJSON string
 }
 
-// DO pulls the objects from the object store
+// DO pulls the objects from the object store.  At present this function
+// container the routing logic.
 func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
 
-	// GROW routing logic (what there is of it)
-	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
+	// collect the information we need for routing resolution
+	// at this time I am collecting a lot..   we may not need all of this
+	object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
+	base := filepath.Base(r.URL.Path)
+	ext := filepath.Ext(r.URL.Path)
+	baseobj := strings.TrimSuffix(base, ext)
+	mt := mime.TypeByExtension(ext)
+	acpt := r.Header.Get("Accept")
+	objInfo, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+	if err != nil {
+		log.Print(err)
+	} else {
+		log.Println(objInfo)
+	}
+	log.Printf("%s %s %s %s %s %s ", acpt, object, ext, mt, base, baseobj)
 
-	if acptHTML {
-		ext := filepath.Ext(r.URL.Path)
+	// First deal with requests that are looking for HTML via the ACCEPT header
+	if strings.Contains(acpt, "text/html") {
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
 			s := strings.TrimSuffix(r.URL.Path, ext)
 			object := fmt.Sprintf("%s/%s.jsonld", prefix, s) // if prefex is nill?
@@ -42,27 +57,27 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 					http.StatusInternalServerError)
 			}
 		} else {
-			log.Printf("Unsupported media type request, in the future I will check function map\n")
+			log.Printf("Requested HTML, but I can not resolve oject to that media type at this time\n")
 			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType),
 				http.StatusUnsupportedMediaType)
 		}
 	} else {
-		// We are not HTML at this point, so we might be sending an object
+		// If we are in this ELSE we are NOT looking for  HTML (by HEADER)
+		//  at this point, so we might be sending an object
 		// or attempting to render a representation of one.
 		// 1) check if the object exist and send it.
 		// 2) if does not exist, check if the ext matches a render version
 
-		object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
-
+		// See if the object exists
 		_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
 		// fmt.Println(objInfo)
 
+		// If the OBJECT DOES NOT seem to exist
 		if err != nil {
 			// we don't see this object by the provided object name, so
 			// let's see if the extension/mimetype can be rendered
-			ext := filepath.Ext(object)
 
-			// TODO recode the if else if to a switch statement?
+			// TODO use switch statementi over if else if?
 			// 	switch ext {
 			// 	case ".geojson":
 			// 		err := operations.TypeGeoJSON(mc, w, r, bucket, object)
@@ -73,6 +88,18 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 			// 		}
 			// case "":
 
+			// service call branch test
+			// need (base object name (no ext), ext and mimetype we have, requested mimetype,  map of external services and mime they op on)
+
+			// affordance check (look for services that do something..   likely reported in a HEAD call for the like)
+
+			// invoker send an object to a service and await the outcome
+			// invoke(urlToPOSTTo, object_orObjectBytesToSend, reqAcceptString, respAcceptString) // optionsla JSON:API package?
+			// urlToPOSTTo comes from id/do/DO/SERVICE  ..  SERVICE pulled to lookup info from
+			// services are in /assets/services  need a func to parse and select from these...
+			// json-ld flatten  -> look for type action -> get entrypoint and grab the template, method and type
+
+			// here down is OLD logic prior to the dynamic routing
 			if strings.Contains(ext, ".geojson") {
 				err := operations.TypeGeoJSON(mc, w, r, bucket, object)
 				if err != nil {
@@ -80,8 +107,8 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 					http.Error(w, http.StatusText(http.StatusNotFound),
 						http.StatusNotFound)
 				}
-			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists
-				jldobj := fmt.Sprintf("%s.jsonld", object)
+			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists and send it as a default
+				jldobj := fmt.Sprintf("%s.jsonld", object) // I don't like this..  if we can not resolve explicitly, don't assume
 				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {
 					log.Println(err)
@@ -93,7 +120,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 				http.Error(w, http.StatusText(http.StatusNotFound),
 					http.StatusNotFound)
 			}
-		} else {
+		} else { // Thje object DOES exist..   send it..  :)
 			err = sendObject(mc, w, r, bucket, object)
 			if err != nil {
 				log.Println(err)
