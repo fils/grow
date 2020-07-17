@@ -23,7 +23,13 @@ func Service(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWri
 	baseobj := strings.TrimSuffix(base, ext)
 	mt := mime.TypeByExtension(ext)
 	acpt := r.Header.Get("Accept")
-	objInfo, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+
+	// hack
+	// split off the serivce ID from the object
+	newobject := strings.TrimSuffix(object, "/"+base)
+	log.Println(newobject)
+
+	objInfo, err := mc.StatObject(bucket, newobject, minio.StatObjectOptions{})
 	if err != nil {
 		log.Print(err)
 	} else {
@@ -31,10 +37,27 @@ func Service(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWri
 	}
 	log.Printf("%s %s %s %s %s %s ", acpt, object, ext, mt, base, baseobj)
 
+	// TODO..  read the object
+
+	fo, err := mc.GetObject(bucket, newobject, minio.GetObjectOptions{})
+	if err != nil {
+		log.Println(err)
+	}
+	/*
+		// send as body
+		var tb bytes.Buffer
+		tbw := bufio.NewWriter(&tb)
+
+		_, err = io.Copy(tbw, fo)
+		if err != nil {
+			log.Println(err)
+		}
+	*/
+
 	// Just a test POST call for now
 	var client http.Client // why do I make this here..  can I use 1 client?  move up in the loop
-	urlloc := "https://postman-echo.com/post"
-	req, err := http.NewRequest("POST", urlloc, nil)
+	urlloc := "https://us-central1-top-operand-112611.cloudfunctions.net/function-1"
+	req, err := http.NewRequest("POST", urlloc, fo)
 	if err != nil {
 		log.Printf("#error on %s : %s  ", urlloc, err) // print an message containing the index (won't keep order)
 	}

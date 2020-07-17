@@ -45,9 +45,9 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 	// WARNING Hackish hard coding for testing....
 	// see if baseobj maps to a service ID
 	log.Printf("/assets/services/%s.jsonld", baseobj)
-	serviceInfo, err := mc.StatObject(bucket, fmt.Sprintf("%s/assets/services/%s.jsonld", prefix, baseobj), minio.StatObjectOptions{})
-	if err != nil {
-		log.Print(err)
+	serviceInfo, serr := mc.StatObject(bucket, fmt.Sprintf("%s/assets/services/%s.jsonld", prefix, baseobj), minio.StatObjectOptions{})
+	if serr != nil {
+		log.Print(serr)
 	} else {
 		log.Println(serviceInfo)
 	}
@@ -78,6 +78,14 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		// or attempting to render a representation of one.
 		// 1) check if the object exist and send it.
 		// 2) if does not exist, check if the ext matches a render version
+
+		// intercept service discovery positive
+
+		// MEGA HACK WARNING...
+		if serr == nil {
+			Service(mc, bucket, prefix, domain, w, r)
+			return
+		}
 
 		// See if the object exists
 		_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
