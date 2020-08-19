@@ -81,7 +81,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 
 		// intercept service discovery positive
 
-		// MEGA HACK WARNING...
+		// ! MEGA HACK WARNING...
 		if serr == nil {
 			Service(mc, bucket, prefix, domain, w, r)
 			return

@@ -24,6 +24,10 @@ func Service(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWri
 	mt := mime.TypeByExtension(ext)
 	acpt := r.Header.Get("Accept")
 
+	// TODO Need functions to:
+	// read the service JSON-LD, pull required elements, read to a struct
+	//
+
 	// hack
 	// split off the serivce ID from the object
 	newobject := strings.TrimSuffix(object, "/"+base)
