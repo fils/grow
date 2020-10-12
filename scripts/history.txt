@@ -1,0 +1,10 @@
+10152* curl -X POST -H 'Content-Type:application/n-triples' -d @requestgraph.nq https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10153* curl -X POST -H 'Content-Type:text/x-nquads' -d @requestgraph.nq https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10156* curl -X POST -H 'Content-Type:application/n-triples' -d @r.nt https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10157* curl -X POST -H 'Content-Type:text/plain' -d @r.nt https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10158* curl -X POST -H 'Content-Type:text/x-nquads' -d @requestgraph.nq https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10160* curl -X POST -H 'Content-Type:text/x-nquads' -d @r.nq https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10161* curl -X POST -H 'Content-Type:text/x-nquads' -d @r.nq https://graph.opencoredata.net/blazegraph/namespace/kb/sparql
+10163* curl -X POST -H 'Content-Type:text/x-nquads' -d @r.nq https://graph.opencoredata.net/blazegraph/namespace/kb/sparql
+10166* curl -X POST -H 'Content-Type:text/x-nquads' --data-binary @r.nq https://graph.opencoredata.net/blazegraph/namespace/ocd/sparql
+10175  history | grep -i curl

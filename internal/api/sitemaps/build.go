@@ -11,7 +11,7 @@ import (
 
 	"github.com/minio/minio-go"
 	"github.com/snabb/sitemap"
-	"oceanleadership.org/grow/internal/objectstore"
+	"github.com/fils/goobjectweb/internal/objectstore"
 )
 
 // SiteMapIndex is t he index of sitemaps
@@ -62,7 +62,13 @@ func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWrite
 	//  How to delete the queue (if to delete it) needs to be resolved.
 }
 
+// TODO..  this following function SUCKS..  it's a hackish proceedural flow that "works" but
+// is fragile to changes..   based on this I see how it really should be done and need to
+// update this soon...
+
 func builder(bucket, prefix, domain string, mc *minio.Client) {
+
+	fmt.Printf("Bucket: %s  Prefix: %s   Domain: %s\n", bucket, prefix, domain)
 
 	// Create a done channel.
 	doneCh := make(chan struct{})
@@ -80,29 +86,58 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 		k := strings.SplitAfterN(message.Key, "/", 3)
 		x := message.LastModified.UTC()
 
-		if strings.Contains(k[1], "website/") {
-			u := fmt.Sprintf("%s%s", domain, k[2])
-			if strings.HasSuffix(u, ".html") {
-				sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+		// fmt.Println(message.Key)
+		// fmt.Println(k)
+
+		if prefix == "" {
+			if strings.Contains(k[0], "website/") { // BUG..  if prefix == "" then these indexes are off..
+				u := fmt.Sprintf("%s%s", domain, k[1])
+				if strings.HasSuffix(u, ".html") {
+					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+				}
+			} else {
+				u := fmt.Sprintf("%sid/%s%s%s", domain, k[0], k[1], k[2])
+				if !strings.Contains(u, "assets/") {
+					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+				}
 			}
 		} else {
-			u := fmt.Sprintf("%sid/%s%s", domain, k[1], k[2])
-			if !strings.Contains(u, "assets/") {
-				sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+			if strings.Contains(k[1], "website/") { // BUG..  if prefix == "" then these indexes are off..
+				u := fmt.Sprintf("%s%s", domain, k[2])
+				if strings.HasSuffix(u, ".html") {
+					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+				}
+			} else {
+				u := fmt.Sprintf("%sid/%s%s", domain, k[1], k[2])
+				if !strings.Contains(u, "assets/") {
+					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+				}
 			}
 		}
 
 		if c > 40000 {
 			// fmt.Println(c)
 			c = 0
-			saveto := fmt.Sprintf("%s/website/sitemap_%d_%s.xml", prefix, c2, prefix)
-			a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+			saveto := ""
+			if prefix == "" {
+				saveto = fmt.Sprintf("website/sitemap_%d.xml", c2)
+			} else {
+				saveto = fmt.Sprintf("%s/website/sitemap_%d_%s.xml", prefix, c2, prefix)
+			}
+
+			if prefix == "" {
+				a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("website/"))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+			} else {
+				a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+			}
+			// a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+
 			c2 = c2 + 1
 			var b bytes.Buffer
 			foo := bufio.NewWriter(&b)
 			sm.WriteTo(foo)
 			foo.Flush()
-			log.Println("Write sitemap to minio")
+			log.Printf("Write sitemap %s", saveto)
 			_, err := objectstore.LoadToMinio(b.Bytes(), bucket, saveto, mc)
 			if err != nil {
 				log.Println(err)
@@ -112,8 +147,22 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 	}
 
 	// need to save the last few in the loop
-	saveto := fmt.Sprintf("%s/website/sitemap_%d_%s.xml", prefix, c2, prefix)
-	a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+	saveto := ""
+	if prefix == "" {
+		saveto = fmt.Sprintf("website/sitemap_%d.xml", c2)
+	} else {
+		saveto = fmt.Sprintf("%s/website/sitemap_%d_%s.xml", prefix, c2, prefix)
+	}
+
+	fmt.Printf("Save to index: %s \n", saveto)
+
+	if prefix == "" {
+		a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("website/"))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+	} else {
+		a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+	}
+	// a = append(a, strings.TrimPrefix(saveto, fmt.Sprintf("%s/website/", prefix))) //s = strings.TrimPrefix(s, "¡¡¡Hello, ")
+
 	var b bytes.Buffer
 	foo := bufio.NewWriter(&b)
 	sm.WriteTo(foo)
@@ -129,7 +178,12 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 		smi.Add(&sitemap.URL{Loc: fmt.Sprintf("%s%s", domain, a[x])})
 	}
 
-	saveto = fmt.Sprintf("%s/website/sitemap.xml", prefix)
+	if prefix == "" {
+		saveto = fmt.Sprintf("website/sitemap.xml")
+	} else {
+		saveto = fmt.Sprintf("%s/website/sitemap.xml", prefix)
+	}
+
 	var b2 bytes.Buffer
 	foo2 := bufio.NewWriter(&b2)
 	smi.WriteTo(foo2)

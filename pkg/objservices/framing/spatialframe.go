@@ -6,7 +6,7 @@ import (
 
 	"cuelang.org/go/pkg/strings"
 	"github.com/tidwall/gjson"
-	"oceanleadership.org/grow/pkg/objservices/jld"
+	"github.com/fils/goobjectweb/pkg/objservices/jld"
 )
 
 // SpatialFD is the structure holding the JSON-LD framing results
@@ -32,6 +32,7 @@ func SpatialFrame(jsonld string) string {
 		"@explicit": true,
 		// "@type":     "Dataset",
 		"spatialCoverage": map[string]interface{}{
+			//"location": map[string]interface{}e spatialCoverage only
 			"@type": "Place",
 			"geo":   map[string]interface{}{},
 		},
@@ -106,8 +107,12 @@ func SpatialTab(records string) []SpatialFD {
 		}
 	} else {
 		if gjson.Get(records, "0.spatialCoverage.geo.#.type").Exists() {
+			// if gjson.Get(records, "0.location.geo.#.type").Exists() {
 			println("Array of spatial elements mode")
-			result := gjson.Get(records, "0.spatialCoverage.geo")
+			result := gjson.Get(records, "0.spatialCoverage.geo") // spatial coverage change here too.  :(
+
+			print("-------------------------------------")
+			println("result")
 
 			result.ForEach(func(key, value gjson.Result) bool {
 				println(value.Get("type").String())

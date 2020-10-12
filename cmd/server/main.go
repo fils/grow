@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"oceanleadership.org/grow/internal/api/graph"
-	"oceanleadership.org/grow/internal/api/sitemaps"
-	"oceanleadership.org/grow/internal/digitalobjects"
-	"oceanleadership.org/grow/internal/fileobjects"
+	"github.com/fils/goobjectweb/internal/api/graph"
+	"github.com/fils/goobjectweb/internal/api/sitemaps"
+	"github.com/fils/goobjectweb/internal/digitalobjects"
+	"github.com/fils/goobjectweb/internal/fileobjects"
 
 	"github.com/gorilla/mux"
 	minio "github.com/minio/minio-go"

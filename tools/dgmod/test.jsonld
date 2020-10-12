@@ -1,0 +1,74 @@
+[
+ {
+  "@graph": [
+   {
+    "@id": "_:bbj6s5pftr9b9lop9nm3g",
+    "@type": [
+     "http://schema.org/PropertyValue"
+    ],
+    "http://schema.org/propertyID": [
+     {
+      "@value": "SHA256"
+     }
+    ],
+    "http://schema.org/value": [
+     {
+      "@value": "00033daef38e12d329be17df28f5032b8adebb3bc4d98c08e0cc013c155603d7"
+     }
+    ]
+   },
+   {
+    "@id": "http://opencoredata.org/id/do/bj6s5pftr9b9lop9nm3g",
+    "@type": [
+     "http://www.schema.org/DigitalDocument"
+    ],
+    "http://schema.org/additionType": [
+     {
+      "@id": "http://opencoredata.org/voc/csdco/v1/Image"
+     }
+    ],
+    "http://schema.org/dateCreated": [
+     {
+      "@value": "2012-08-24"
+     }
+    ],
+    "http://schema.org/description": [
+     {
+      "@value": "Digital object of type Images named HYBLA-HYB08-1A-42-3.jpg for CSDCO project HYBLA"
+     }
+    ],
+    "http://schema.org/encodingFormat": [
+     {
+      "@value": "image/jpeg"
+     }
+    ],
+    "http://schema.org/identifier": [
+     {
+      "@id": "_:bbj6s5pftr9b9lop9nm3g"
+     }
+    ],
+    "http://schema.org/isRelatedTo": [
+     {
+      "@value": "HYBLA"
+     }
+    ],
+    "http://schema.org/license": [
+     {
+      "@id": "http://example.com/cc0.html"
+     }
+    ],
+    "http://schema.org/name": [
+     {
+      "@value": "HYBLA-HYB08-1A-42-3.jpg"
+     }
+    ],
+    "http://schema.org/url": [
+     {
+      "@id": "http://opencoredata.org/id/do/00033daef38e12d329be17df28f5032b8adebb3bc4d98c08e0cc013c155603d7"
+     }
+    ]
+   }
+  ],
+  "@id": "http://opencoredata.org/objectgraph/id/00033daef38e12d329be17df28f5032b8adebb3bc4d98c08e0cc013c155603d7"
+ }
+]

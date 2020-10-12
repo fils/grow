@@ -6,7 +6,7 @@ import (
 
 	"github.com/twpayne/go-geom"
 	geomgj "github.com/twpayne/go-geom/encoding/geojson"
-	"oceanleadership.org/grow/pkg/objservices/framing"
+	"github.com/fils/goobjectweb/pkg/objservices/framing"
 )
 
 // An all in one test for the SDO to GeoJSON flow
@@ -15,10 +15,16 @@ import (
 func SDO2GeoJSON(jsonld string) (string, error) {
 	g := geom.NewGeometryCollection()
 
+	// log.Println(jsonld)
+
 	// frame to get the spatial info
 	sf := framing.SpatialFrame(jsonld)
 
+	log.Println(sf)
+
 	data := framing.SpatialTab(sf)
+
+	log.Println(data)
 
 	for i := range data {
 		log.Println("-------------")

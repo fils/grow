@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
 
-	"oceanleadership.org/grow/internal/fileactions"
-	"oceanleadership.org/grow/pkg/objservices/spatial"
+	"github.com/fils/goobjectweb/internal/fileactions"
+	"github.com/fils/goobjectweb/pkg/objservices/spatial"
 
 	"github.com/minio/minio-go"
 )
@@ -22,6 +23,7 @@ func TypeGeoJSON(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucke
 	jldobj := strings.Replace(object, ".geojson", ".jsonld", 1)
 	fo, err := mc.GetObject(bucket, jldobj, minio.GetObjectOptions{})
 	if err != nil {
+		log.Println("Error reading object in TypeGeoJSON")
 		return err
 	}
 
@@ -30,11 +32,13 @@ func TypeGeoJSON(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucke
 
 	_, err = io.Copy(bw, fo)
 	if err != nil {
+		log.Println("Error copying object in TypeGeoJSON")
 		return err
 	}
 
 	gj, err := spatial.SDO2GeoJSON(string(b.Bytes()))
 	if err != nil {
+		log.Println("Spatial Call error in TypeGeoJSON")
 		return err
 	}
 	sr := strings.NewReader(gj)

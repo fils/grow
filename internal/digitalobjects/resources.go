@@ -12,8 +12,8 @@ import (
 	"text/template"
 
 	"github.com/minio/minio-go"
-	"oceanleadership.org/grow/internal/fileactions"
-	"oceanleadership.org/grow/internal/operations"
+	"github.com/fils/goobjectweb/internal/fileactions"
+	"github.com/fils/goobjectweb/internal/operations"
 )
 
 // UFOKNPageData is the struct for the template page
@@ -113,6 +113,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 
 	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
 	if err != nil {
+		log.Println("Failed to get object")
 		return err
 	}
 
@@ -121,6 +122,8 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 
 	_, err = io.Copy(bw, fo)
 	if err != nil {
+		log.Println("Failed io.Copy")
+		log.Println(err)
 		return err
 	}
 
@@ -129,6 +132,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 	log.Println(filepath.Dir(r.URL.Path))
 	to, err := mc.GetObject(bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
 	if err != nil {
+		log.Println("Failed to open template")
 		return err
 	}
 
