@@ -19,7 +19,7 @@ import (
 // Build launches a go func to build a graph.
 func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
 
-	go builder(bucket, prefix, domain, mc)
+	go builder(bucket, prefix, mc)
 
 	// TODO   // ? https://schema.org/CreateAction https://schema.org/docs/actions.html
 	// POST a request JSON body to /api/sitemap
@@ -35,8 +35,8 @@ func Build(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWrite
 	//  How to delete the queue (if to delete it) needs to be resolved.
 }
 
-func builder(bucket, prefix, domain string, mc *minio.Client) {
-	log.Println("Builder call started")
+func builder(bucket, prefix string, mc *minio.Client) {
+	log.Println("Graph builder call started")
 
 	// Create a done channel.
 	doneCh := make(chan struct{})
@@ -94,7 +94,14 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 
 	go func() {
 		defer lwg.Done()
-		_, err := mc.PutObject("scratch", "requestgraph.nq", pr, -1, minio.PutObjectOptions{})
+		var op string
+		if prefix == "" {
+			op = fmt.Sprint("website/sitekg.nq", prefix) // should this be website?
+		} else {
+			op = fmt.Sprintf("%s/website/sitekg.nq", prefix)
+		}
+
+		_, err := mc.PutObject(bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
 		if err != nil {
 			log.Println(err)
 		}
@@ -165,7 +172,7 @@ func globalUniqueBNodes(nq string) string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	//fmt.Println(m)

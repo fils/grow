@@ -41,7 +41,8 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	if err != nil {
 		log.Println("Error on object access")
 		log.Println(err)
-		http.Error(w, "object not found", 404)
+		// http.Error(w, "object not found", 404)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 

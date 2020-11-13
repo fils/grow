@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"cuelang.org/go/pkg/strings"
-	"github.com/tidwall/gjson"
 	"github.com/fils/goobjectweb/pkg/objservices/jld"
+	"github.com/tidwall/gjson"
 )
 
 // SpatialFD is the structure holding the JSON-LD framing results
@@ -28,7 +28,7 @@ func SpatialFrame(jsonld string) string {
 	proc, options := jld.ProcOpts()
 
 	frame := map[string]interface{}{
-		"@context":  "http://schema.org/",
+		"@context":  "https://schema.org/",
 		"@explicit": true,
 		// "@type":     "Dataset",
 		"spatialCoverage": map[string]interface{}{

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/minio/minio-go"
 	"github.com/fils/goobjectweb/internal/fileactions"
 	"github.com/fils/goobjectweb/internal/operations"
+	"github.com/minio/minio-go"
 )
 
 // UFOKNPageData is the struct for the template page
@@ -28,6 +28,9 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 
 	// GROW routing logic (what there is of it)
 	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
+
+	// TODO add in the elseif here to check for .zip (in both sections)
+	// ten route as I do for geojson  (look to make this generic at this time?)
 
 	if acptHTML {
 		ext := filepath.Ext(r.URL.Path)
@@ -114,6 +117,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		log.Println("Failed to get object")
+		w.WriteHeader(http.StatusNotFound)
 		return err
 	}
 

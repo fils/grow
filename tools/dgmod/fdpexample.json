@@ -1,0 +1,22 @@
+{
+  "description": "Deep Lake project: Geotek CIS (jpg) (1 files) \n",
+  "name": "Deep Lake_Geotek CIS (jpg).zip",
+  "resources": [
+    {
+      "additionalType": "",
+      "description": "Digital object of type Images named DL00-G2.BMP for CSDCO project Deep Lake",
+      "licenses": "http://spdx.org/licenses/CC0-1.0",
+      "mediatype": "image/bmp",
+      "name": "DL00-G2.BMP",
+      "path": "https://opencoredata.org/id/csdco/do/b33725f2bdf97e05655b5edf80b67e2d990e44ce9060710ed8a6a2c8fd21e1d9",
+      "type": "image/bmp"
+    }
+  ],
+  "sources": [
+    {
+      "name": "CSDCO",
+      "web": "http://csdco.org"
+    }
+  ],
+  "title": "Geotek CIS (jpg)"
+}

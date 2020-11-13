@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/fils/goobjectweb/internal/objectstore"
 	"github.com/minio/minio-go"
 	"github.com/snabb/sitemap"
-	"github.com/fils/goobjectweb/internal/objectstore"
 )
 
 // SiteMapIndex is t he index of sitemaps
@@ -82,12 +82,20 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 	for message := range mc.ListObjectsV2(bucket, prefix, recursive, doneCh) {
 		c = c + 1
 
-		// fmt.Println(message.Key)
-		k := strings.SplitAfterN(message.Key, "/", 3)
+		var k []string
+
+		if prefix == "" {
+			k = strings.SplitAfterN(message.Key, "/", 2)
+		} else {
+			k = strings.SplitAfterN(message.Key, "/", 3)
+		}
+
 		x := message.LastModified.UTC()
 
 		// fmt.Println(message.Key)
 		// fmt.Println(k)
+		// fmt.Println((prefix == ""))
+		// fmt.Println(len(k))
 
 		if prefix == "" {
 			if strings.Contains(k[0], "website/") { // BUG..  if prefix == "" then these indexes are off..
@@ -96,9 +104,11 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
 				}
 			} else {
-				u := fmt.Sprintf("%sid/%s%s%s", domain, k[0], k[1], k[2])
+				u := fmt.Sprintf("%sid/%s%s", domain, k[0], k[1])
 				if !strings.Contains(u, "assets/") {
-					sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+					if strings.HasSuffix(u, ".jsonld") {
+						sm.Add(&sitemap.URL{Loc: u, LastMod: &x})
+					}
 				}
 			}
 		} else {
