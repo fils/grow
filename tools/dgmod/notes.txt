@@ -1,0 +1,23 @@
+The mimetype for Frictionless data packages is: vnd.datapackage
+
+I can not find one for Research Data Object.  I will use
+vmd.researchdataobject 
+
+
+schema.org/encodingFormat  "vnd.datapackage"	
+
+could place this on the distribution
+
+  "distribution": {
+    "@type": "DataDownload",
+    "contentUrl": "https://opencoredata.org/id/csdco/pkg/2028f26c495c16f29fe9225e62b3b68417577f6a4ab1ad0f71d35a7808be72e4",
+    "encodingFormat": "vnd.datapackage"
+  },
+
+You can set a type attribute on the a element. So something like:
+
+<a type="vnd.datapackage" href="...">...</a>
+
+Here element a's type maps to the encodingFormat.   
+
+

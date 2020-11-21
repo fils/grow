@@ -49,7 +49,7 @@ func main() {
 	log.Printf("a: %s  b %s  p %s d %s k %s  s %s\n", s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal)
 
 	// Need to convert this to gocloud.dev bloc (https://gocloud.dev/howto/blob/)
-	mc, err := minio.New(s3addressVal, keyVal, secretVal, false)
+	mc, err := minio.New(s3addressVal, keyVal, secretVal, true)
 	if err != nil {
 		log.Println(err)
 	}

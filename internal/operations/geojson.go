@@ -16,7 +16,7 @@ import (
 )
 
 // TypeGeoJSON takes a DO of type JSON-LD and coverts it to GeoJSON.
-// The function atempts to get teh JSON-LD object and
+// The function attempts to get teh JSON-LD object and
 // then convert and send
 func TypeGeoJSON(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object string) error {
 

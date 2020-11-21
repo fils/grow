@@ -22,7 +22,6 @@ For more details visit [the about page.](./docs/about.md)
 
 ![GitHub Logo](./docs/images/objecChain.png)
 
-
 ## commands
 
 GROW can be run from the command line for Docker.

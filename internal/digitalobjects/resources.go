@@ -83,6 +83,13 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 					http.Error(w, http.StatusText(http.StatusNotFound),
 						http.StatusNotFound)
 				}
+			} else if strings.Contains(ext, ".zip") {
+				err := operations.DownloadPkg(mc, w, r, bucket, object)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, http.StatusText(http.StatusNotFound),
+						http.StatusNotFound)
+				}	
 			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists
 				jldobj := fmt.Sprintf("%s.jsonld", object)
 				err := sendObject(mc, w, r, bucket, jldobj)
