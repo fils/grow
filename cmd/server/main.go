@@ -8,6 +8,7 @@ import (
 
 	"github.com/fils/goobjectweb/internal/api/graph"
 	"github.com/fils/goobjectweb/internal/api/sitemaps"
+	"github.com/fils/goobjectweb/internal/api/tika"
 	"github.com/fils/goobjectweb/internal/digitalobjects"
 	"github.com/fils/goobjectweb/internal/fileobjects"
 
@@ -52,12 +53,14 @@ func main() {
 	mc, err := minio.New(s3addressVal, keyVal, secretVal, true)
 	if err != nil {
 		log.Println(err)
+
 	}
 
 	// Handler sm:   builds sitemaps
 	sm := mux.NewRouter()
 	sm.PathPrefix("/api/sitemap").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, sitemaps.Build)))
 	sm.PathPrefix("/api/graph").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, graph.Build)))
+	sm.PathPrefix("/api/fulltext").Handler(http.StripPrefix("/api/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, tika.Build)))
 
 	sm.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/api/", &MyServer{sm})

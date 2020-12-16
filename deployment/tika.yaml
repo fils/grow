@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  tika:
+    image: logicalspark/docker-tikaserver
+    ports:
+      - 9998:9998
+    environment:
+      - SERVICE_PORTS=9998
+    networks:
+      - web
+
+networks:
+  web:
+    driver: overlay
+

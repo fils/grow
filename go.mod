@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	cuelang.org/go v0.2.2
+	github.com/bbalet/stopwords v1.0.0
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/minio/minio-go v6.0.14+incompatible
