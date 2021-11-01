@@ -87,7 +87,7 @@ func DownloadPkg(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucke
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(o)
+		// log.Println(o)
 		// range on the stuct items that are objects and pass to addObject()
 		// sub in o
 		// TODO  WARNING on this line..   a place holder till deployed to where the DO byte stream are
@@ -166,8 +166,8 @@ func addObject(mc *minio.Client, oid, name string, zw *zip.Writer) error {
 	}
 
 	// copy the object contents to the zip Writer
-	n, err := io.Copy(cf, fo)
-	log.Printf("Copied %d bytes\n", n)
+	_, err = io.Copy(cf, fo)
+	// log.Printf("Copied %d bytes\n", n)
 	if err != nil {
 		log.Println(err)
 	}

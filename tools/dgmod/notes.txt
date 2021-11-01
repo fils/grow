@@ -1,3 +1,9 @@
+Need to review:
+
+https://github.com/chmln/sd
+https://stedolan.github.io/jq/
+
+
 The mimetype for Frictionless data packages is: vnd.datapackage
 
 I can not find one for Research Data Object.  I will use

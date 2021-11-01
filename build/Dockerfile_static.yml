@@ -1,0 +1,16 @@
+# Start from scratch image and add in a precompiled binary
+# CGO_ENABLED=0 env go build .
+# docker build -t earthcube/p418fence:latest -t earthcube/p418fence:0.0.4 .
+# docker run -d -p 9900:9900  opencoredata/ocdweb:0.0.1
+#FROM scratch
+FROM gcr.io/distroless/base
+
+# Add in the static elements (could also mount these from local filesystem) later as the indexes grow
+ADD cmd/staticsite/server_static /
+ADD ./context /context
+
+# Document that the service listens on this port
+EXPOSE 8080
+
+# Add our binary
+CMD ["/server_static"]

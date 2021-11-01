@@ -175,7 +175,7 @@ func fullTextTrpls(s, obj string) (string, error) {
 
 // EngineTika sends a byte array to tika for processing into text
 func EngineTika(b []byte) (string, error) {
-	tikaurl := "http://localhost:9998/tika"
+	tikaurl := "http://tika:9998/tika"
 
 	req, err := http.NewRequest("PUT", tikaurl, bytes.NewReader(b))
 	req.Header.Set("Accept", "text/plain")

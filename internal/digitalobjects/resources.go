@@ -36,7 +36,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		ext := filepath.Ext(r.URL.Path)
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
 			s := strings.TrimSuffix(r.URL.Path, ext)
-			object := fmt.Sprintf("%s/%s.jsonld", prefix, s) // if prefex is nill?
+			object := fmt.Sprintf("%s/%s.jsonld", prefix, s) // if prefix is nill?
 			log.Printf("b: %s o: %s p:%s ", bucket, object, prefix)
 			err := sendHTML(mc, w, r, bucket, object, prefix)
 			if err != nil {
@@ -44,6 +44,11 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
+		} else if ext == ".zip" {
+			s := strings.TrimSuffix(r.URL.Path, ext)
+			object := fmt.Sprintf("%s/%s.zip", prefix, s) // if prefix is nill?
+			log.Printf("b: %s o: %s p:%s ", bucket, object, prefix)
+			operations.DownloadPkg(mc, w, r, bucket, object)
 		} else {
 			log.Printf("Unsupported media type request, in the future I will check function map\n")
 			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType),
@@ -76,6 +81,8 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 			// 		}
 			// case "":
 
+			log.Printf("Extension: %s", ext)
+
 			if strings.Contains(ext, ".geojson") {
 				err := operations.TypeGeoJSON(mc, w, r, bucket, object)
 				if err != nil {
@@ -89,7 +96,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 					log.Println(err)
 					http.Error(w, http.StatusText(http.StatusNotFound),
 						http.StatusNotFound)
-				}	
+				}
 			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists
 				jldobj := fmt.Sprintf("%s.jsonld", object)
 				err := sendObject(mc, w, r, bucket, jldobj)
@@ -183,7 +190,7 @@ func sendObject(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket
 
 	ext := filepath.Ext(object)
 
-	log.Println(ext)
+	// log.Println(ext)
 	mime := fileactions.MimeByType(ext)
 
 	// m := fileactions.MimeByType(filepath.Ext(key))

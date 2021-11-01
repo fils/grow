@@ -10,7 +10,7 @@ come from an S3 API object store.  It can use the open source Minio
 S3 backend or any of the AWS, Google Cloud or Azure object storage 
 services.   I've tested this mostly on Docker Swarm and Google Cloud Run.
 
-> Note:  GROW is a very simplist object server.  For a more sophisticate
+> Note:  GROW is a very simplistic object server.  For a more sophisticate
 > solution with far more features try Clouder. (https://clowder.ncsa.illinois.edu/)
 
 GROW leverages the RDA Digital Object Cloud pattern and is a basic implementation 

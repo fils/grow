@@ -1,9 +1,10 @@
 BINARY := server
 GROUP := general
 DOCKERVER :=`/bin/cat VERSION`
-.DEFAULT_GOAL := linux
+.DEFAULT_GOAL := server
 
-linux:
+# server for the dynamic site  (routing api and id)
+server:
 		cd cmd/server ; \
 		GOOS=linux GOARCH=amd64 CGO_ENABLED=0 env go build -o $(BINARY)
 
@@ -23,5 +24,19 @@ tag:
 publishgcr:
 	docker push gcr.io/top-operand-112611/grow-$(GROUP):$(DOCKERVER)
 
-togcr: linux docker tag publishgcr
-tohub: linux docker dockerlatest publish
+togcr: server docker tag publishgcr
+tohub: server docker dockerlatest publish
+
+# server for the static site approach (ala S3 website)
+
+server_static:
+		cd cmd/staticsite ; \
+		GOOS=linux GOARCH=amd64 CGO_ENABLED=0 env go build -o $(BINARY)_static
+
+docker_static:
+		docker build  --tag="fils/grow_static-$(GROUP):$(DOCKERVER)"  --file=./build/Dockerfile_static.yml .
+
+dockerlatest_static:
+		docker build  --tag="fils/grow_static-$(GROUP):latest"  --file=./build/Dockerfile_static.yml .
+
+

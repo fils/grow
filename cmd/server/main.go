@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/fils/goobjectweb/internal/api/graph"
 	"github.com/fils/goobjectweb/internal/api/sitemaps"
@@ -17,7 +18,7 @@ import (
 )
 
 var s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal string
-var localVal bool
+var localVal, s3SSLVal bool
 
 // MyServer is the Gorilla mux router structure
 type MyServer struct {
@@ -27,7 +28,8 @@ type MyServer struct {
 func init() {
 	log.SetFlags(log.Lshortfile)
 
-	flag.BoolVar(&localVal, "local", false, "Server file local over object store, false by default")
+	flag.BoolVar(&localVal, "local", false, "Serve file local over object store, false by default")
+	flag.BoolVar(&s3SSLVal, "ssl", false, "S3 access is SSL, false by default for docker network backend")
 	flag.StringVar(&s3addressVal, "server", "0.0.0.0:0000", "Address of the object server with port")
 	flag.StringVar(&s3bucketVal, "bucket", "website", "bucket which holds the web site objects")
 	flag.StringVar(&s3prefixVal, "prefix", "website", "bucket prefix for the objects")
@@ -44,13 +46,20 @@ func main() {
 	domainVal = os.Getenv("DOMAIN")
 	keyVal = os.Getenv("S3KEY")
 	secretVal = os.Getenv("S3SECRET")
+	s3SSLVal, err := strconv.ParseBool(os.Getenv("S3SSL"))
+	if err != nil {
+		log.Println("Error reading SSL booling flag")
+	}
+
+	// TODO move to viper config for this app  (pass tika URL)
 
 	// Parse the flags if any, will override the environment vars
 	flag.Parse() // parse any command line flags...
-	log.Printf("a: %s  b %s  p %s d %s k %s  s %s\n", s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal)
+
+	log.Printf("a: %s  b %s  p %s d %s k %s  s %s  ssl %v \n", s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal, s3SSLVal)
 
 	// Need to convert this to gocloud.dev bloc (https://gocloud.dev/howto/blob/)
-	mc, err := minio.New(s3addressVal, keyVal, secretVal, true)
+	mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
 	if err != nil {
 		log.Println(err)
 
