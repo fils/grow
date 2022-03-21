@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/fils/goobjectweb/internal/digitalobjects"
 	"log"
 	"net/http"
 	"os"
@@ -59,6 +60,12 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	// Handler doc:   addresses the /id/* request path
+	doc := mux.NewRouter()
+	doc.PathPrefix("/id/").Handler(http.StripPrefix("/id/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, digitalobjects.DO)))
+	doc.NotFoundHandler = http.HandlerFunc(notFound)
+	http.Handle("/id/", &MyServer{doc})
 
 	// Handler dr:   addresses the / request path
 	dr := mux.NewRouter()

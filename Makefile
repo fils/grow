@@ -39,4 +39,6 @@ docker_static:
 dockerlatest_static:
 		docker build  --tag="fils/grow_static-$(GROUP):latest"  --file=./build/Dockerfile_static.yml .
 
-
+publish_static:  
+		docker push fils/grow_static-$(GROUP):$(DOCKERVER)
+		docker push fils/grow_static-$(GROUP):latest

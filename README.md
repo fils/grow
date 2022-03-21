@@ -66,3 +66,12 @@ On Docker this would look like:
 
 ```
 
+
+## Future Thoughts
+
+I am interested in packages like [caffeine](https://github.com/rehacktive/caffeine) that represet a REST 
+style approach.  They could be used directly or as a pattern in GROW to test structured data on the 
+web tools.
+
+
+

@@ -18,8 +18,6 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	var object string
 	key := fmt.Sprintf("%s", r.URL.Path)
 
-	log.Println(key)
-
 	// TODO review this hack...
 	if key == "" {
 		key = "index.html"
@@ -33,7 +31,6 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	log.Printf("%s: %s \n", key, m)
 
 	object = fmt.Sprintf("%s/website/%s", prefix, key)
-
 	log.Println(object)
 
 	// check our object is there first....

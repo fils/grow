@@ -48,7 +48,7 @@ func main() {
 	secretVal = os.Getenv("S3SECRET")
 	s3SSLVal, err := strconv.ParseBool(os.Getenv("S3SSL"))
 	if err != nil {
-		log.Println("Error reading SSL booling flag")
+		log.Println("Error reading SSL bool flag")
 	}
 
 	// TODO move to viper config for this app  (pass tika URL)
@@ -62,7 +62,6 @@ func main() {
 	mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
 	if err != nil {
 		log.Println(err)
-
 	}
 
 	// Handler sm:   builds sitemaps
