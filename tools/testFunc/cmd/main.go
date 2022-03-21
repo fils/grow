@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"image"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	_ "image/jpeg"

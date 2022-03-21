@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 

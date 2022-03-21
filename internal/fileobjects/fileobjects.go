@@ -2,8 +2,8 @@ package fileobjects
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strings"

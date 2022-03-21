@@ -1,13 +1,12 @@
 // Package p contains an HTTP Cloud Function.
 // package p
-package p
+package main
 
 import (
 	"bytes"
 	"fmt"
 	"image"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	_ "image/jpeg"
@@ -24,7 +23,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 
 	m, _, err := image.Decode(bytes.NewBuffer(data))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Print(err)
 	}
 	bounds := m.Bounds()
 

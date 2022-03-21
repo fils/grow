@@ -1,12 +1,12 @@
 package spatial
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 
+	"github.com/fils/goobjectweb/pkg/objservices/framing"
 	"github.com/twpayne/go-geom"
 	geomgj "github.com/twpayne/go-geom/encoding/geojson"
-	"github.com/fils/goobjectweb/pkg/objservices/framing"
 )
 
 // An all in one test for the SDO to GeoJSON flow

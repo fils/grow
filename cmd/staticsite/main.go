@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/fils/goobjectweb/internal/digitalobjects"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/fils/goobjectweb/internal/fileobjects"
 
@@ -23,7 +25,26 @@ type MyServer struct {
 }
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+
+	// Output to stdout instead of the default stderr. Can be any io.Writer, see below for File example
+
+	// name the file with the date and time
+	const layout = "2006-01-02-15-04-05"
+	t := time.Now()
+	lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
+
+	LogFile := lf // log to custom file
+	logFile, err := os.OpenFile(LogFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	log.SetFormatter(&log.JSONFormatter{}) // Log as JSON instead of the default ASCII formatter.
+	log.SetReportCaller(true)              // include file name and line number
+	log.SetOutput(logFile)
+
+	//log.SetLevel(log.WarnLevel) // Only log the warning severity or above.
 
 	flag.BoolVar(&localVal, "local", false, "Serve file local over object store, false by default")
 	flag.BoolVar(&s3SSLVal, "ssl", false, "S3 access is SSL, false by default for docker network backend")

@@ -2,7 +2,7 @@ package objectstore
 
 import (
 	"bytes"
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	minio "github.com/minio/minio-go"
 )

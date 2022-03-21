@@ -2,7 +2,7 @@ package framing
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"cuelang.org/go/pkg/strings"
 	"github.com/fils/goobjectweb/pkg/objservices/jld"

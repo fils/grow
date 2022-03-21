@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"os"
 	"time"
 

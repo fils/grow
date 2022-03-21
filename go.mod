@@ -10,6 +10,7 @@ require (
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/piprate/json-gold v0.3.0
 	github.com/rs/xid v1.2.1
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/snabb/sitemap v1.0.0
 	github.com/tidwall/gjson v1.6.1
 	github.com/twpayne/go-geom v1.3.6

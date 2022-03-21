@@ -3,8 +3,8 @@ package operations
 import (
 	"bufio"
 	"bytes"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strings"

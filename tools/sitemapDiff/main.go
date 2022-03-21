@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"time"
 
 	cache "github.com/patrickmn/go-cache"
-	"github.com/yterajima/go-sitemap"
 )
 
 func main() {
