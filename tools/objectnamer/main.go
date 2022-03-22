@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/minio/minio-go"
 	"github.com/tidwall/gjson"
 )
 

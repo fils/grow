@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/minio/minio-go"
 	"github.com/snabb/sitemap"
 )
 

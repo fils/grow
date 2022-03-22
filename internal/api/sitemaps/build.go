@@ -3,14 +3,16 @@ package sitemaps
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/xml"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 
+	minio "github.com/minio/minio-go/v7"
+
 	"github.com/fils/goobjectweb/internal/objectstore"
-	"github.com/minio/minio-go"
 	"github.com/snabb/sitemap"
 )
 
@@ -74,12 +76,17 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 	sm := sitemap.New()
-	recursive := true
 	c := 0
 	c2 := 0
 	var a []string
 
-	for message := range mc.ListObjectsV2(bucket, prefix, recursive, doneCh) {
+	isRecursive := true
+	opts := minio.ListObjectsOptions{
+		Recursive: isRecursive,
+		Prefix:    prefix,
+	}
+	for message := range mc.ListObjects(context.Background(), bucket, opts) {
+		//for message := range mc.ListObjectsV2(bucket, prefix, recursive, doneCh) {
 		c = c + 1
 
 		var k []string

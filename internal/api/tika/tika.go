@@ -3,7 +3,9 @@ package tika
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
+	minio "github.com/minio/minio-go/v7"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -13,7 +15,6 @@ import (
 	"sync"
 
 	"github.com/bbalet/stopwords"
-	"github.com/minio/minio-go"
 )
 
 // Build launches a go func to build.   Needs to return a
@@ -28,7 +29,7 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 	// Create a done channel.
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	recursive := true
+	//recursive := true
 
 	// Pipecopy elements
 	pr, pw := io.Pipe()     // TeeReader of use?
@@ -40,8 +41,12 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 		defer pw.Close()
 
 		// WARNING hard coded "prefix" here
-		for message := range mc.ListObjectsV2(bucket, fmt.Sprintf("%s/csdco/do", prefix), recursive, doneCh) {
-
+		isRecursive := true
+		opts := minio.ListObjectsOptions{
+			Recursive: isRecursive,
+			Prefix:    prefix,
+		}
+		for message := range mc.ListObjects(context.Background(), bucket, opts) {
 			if !strings.HasSuffix(message.Key, ".jsonld") {
 				log.Println(message.Key)
 
@@ -67,7 +72,7 @@ func builder(bucket, prefix, domain string, mc *minio.Client) {
 
 		log.Println(op)
 
-		_, err := mc.PutObject(bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
+		_, err := mc.PutObject(context.Background(), bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
 		if err != nil {
 			log.Println(err)
 		}
@@ -101,7 +106,7 @@ func singlebuilder(bucket, prefix, domain string, mc *minio.Client) {
 		bucket = "ocdprod"
 		object := "/csdco/do/000003a5ee30630237ae9690fd10a576b8bfb3d6c3e2ce541924522ef5b69f2c"
 
-		message, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+		message, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
 		if err != nil {
 			log.Print(err)
 		}
@@ -124,7 +129,7 @@ func singlebuilder(bucket, prefix, domain string, mc *minio.Client) {
 			op = fmt.Sprintf("%s/website/fulltext.nq", prefix)
 		}
 
-		_, err := mc.PutObject(bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
+		_, err := mc.PutObject(context.Background(), bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
 		if err != nil {
 			log.Println(err)
 		}
@@ -139,7 +144,7 @@ func singlebuilder(bucket, prefix, domain string, mc *minio.Client) {
 }
 
 func processObject(mc *minio.Client, bucket, prefix string, message minio.ObjectInfo) (string, error) {
-	fo, err := mc.GetObject(bucket, message.Key, minio.GetObjectOptions{})
+	fo, err := mc.GetObject(context.Background(), bucket, message.Key, minio.GetObjectOptions{})
 	if err != nil {
 		log.Printf("get object %s", err)
 		// return "", err

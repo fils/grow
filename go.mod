@@ -8,6 +8,7 @@ require (
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/minio/minio-go v6.0.14+incompatible
+	github.com/minio/minio-go/v7 v7.0.23 // indirect
 	github.com/piprate/json-gold v0.3.0
 	github.com/rs/xid v1.2.1
 	github.com/sirupsen/logrus v1.8.1 // indirect

@@ -3,6 +3,7 @@ package graph
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/minio/minio-go"
+	minio "github.com/minio/minio-go/v7"
+
 	"github.com/piprate/json-gold/ld"
 	"github.com/rs/xid"
 )
@@ -41,7 +43,6 @@ func builder(bucket, prefix string, mc *minio.Client) {
 	// Create a done channel.
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	recursive := true
 
 	// Pipecopy elements
 	pr, pw := io.Pipe()     // TeeReader of use?
@@ -51,13 +52,19 @@ func builder(bucket, prefix string, mc *minio.Client) {
 	go func() {
 		defer lwg.Done()
 		defer pw.Close()
-		for message := range mc.ListObjectsV2(bucket, prefix, recursive, doneCh) {
+
+		isRecursive := true
+		opts := minio.ListObjectsOptions{
+			Recursive: isRecursive,
+			Prefix:    prefix,
+		}
+		for message := range mc.ListObjects(context.Background(), bucket, opts) {
 			// fmt.Println(message.Key)
 			// k := strings.SplitAfterN(message.Key, "/", 3)
 			// save for later  x := message.LastModified.UTC()
 
 			if strings.HasSuffix(message.Key, ".jsonld") {
-				fo, err := mc.GetObject(bucket, message.Key, minio.GetObjectOptions{})
+				fo, err := mc.GetObject(context.Background(), bucket, message.Key, minio.GetObjectOptions{})
 				if err != nil {
 					fmt.Printf("get object %s", err)
 					// return "", err
@@ -101,7 +108,7 @@ func builder(bucket, prefix string, mc *minio.Client) {
 			op = fmt.Sprintf("%s/website/sitekg.nq", prefix)
 		}
 
-		_, err := mc.PutObject(bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
+		_, err := mc.PutObject(context.Background(), bucket, op, pr, -1, minio.PutObjectOptions{}) // TODO  this is potentially dangerous..  it will over write this object at least
 		if err != nil {
 			log.Println(err)
 		}

@@ -16,7 +16,11 @@ import (
 	"github.com/fils/goobjectweb/internal/fileobjects"
 
 	"github.com/gorilla/mux"
-	minio "github.com/minio/minio-go"
+	// "github.com/minio/minio-go/v7"
+	// minio "github.com/minio/minio-go/v7"
+
+	minio "github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 var s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal string
@@ -77,7 +81,10 @@ func main() {
 	log.Printf("a: %s  b %s  p %s d %s k %s  s %s  ssl %v \n", s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal, s3SSLVal)
 
 	// Need to convert this to gocloud.dev bloc (https://gocloud.dev/howto/blob/)
-	mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
+	//mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
+	mc, err := minio.New(s3addressVal,
+		&minio.Options{Creds: credentials.NewStaticV4(keyVal, secretVal, ""),
+			Secure: s3SSLVal})
 	if err != nil {
 		log.Println(err)
 	}

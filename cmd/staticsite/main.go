@@ -13,7 +13,7 @@ import (
 	"github.com/fils/goobjectweb/internal/fileobjects"
 
 	"github.com/gorilla/mux"
-	minio "github.com/minio/minio-go"
+	minio "github.com/minio/minio-go/v7"
 )
 
 var s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal string

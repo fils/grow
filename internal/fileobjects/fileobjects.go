@@ -1,6 +1,7 @@
 package fileobjects
 
 import (
+	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -8,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fils/goobjectweb/internal/fileactions"
+	minio "github.com/minio/minio-go/v7"
 
-	"github.com/minio/minio-go"
+	"github.com/fils/goobjectweb/internal/fileactions"
 )
 
 // FileObjects pulls the objects from the object store
@@ -34,7 +35,7 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	log.Println(object)
 
 	// check our object is there first....
-	_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+	_, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
 	if err != nil {
 		log.Println("Error on object access")
 		log.Println(err)
@@ -43,7 +44,7 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 		return
 	}
 
-	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
+	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		log.Printf("Error getobjt: %s  \n err: %s", object, err)
 		//http.Error(w, "object not found",404)

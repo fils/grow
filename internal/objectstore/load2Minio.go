@@ -2,9 +2,10 @@ package objectstore
 
 import (
 	"bytes"
+	"context"
 	log "github.com/sirupsen/logrus"
 
-	minio "github.com/minio/minio-go"
+	minio "github.com/minio/minio-go/v7"
 )
 
 // LoadToMinio loads jsonld into the specified bucket
@@ -19,7 +20,7 @@ func LoadToMinio(b []byte, bucketName, objectName string, mc *minio.Client) (int
 	// usermeta["sha1"] = bss
 
 	//log.Println(bucketName)
-	n, err := mc.PutObject(bucketName, objectName, bb, int64(bb.Len()), minio.PutObjectOptions{ContentType: contentType, UserMetadata: usermeta})
+	n, err := mc.PutObject(context.Background(), bucketName, objectName, bb, int64(bb.Len()), minio.PutObjectOptions{ContentType: contentType, UserMetadata: usermeta})
 	if err != nil {
 		log.Printf("%s/%s", bucketName, objectName)
 		log.Println(err)
@@ -28,5 +29,5 @@ func LoadToMinio(b []byte, bucketName, objectName string, mc *minio.Client) (int
 
 	// log.Printf("#%d Uploaded Bucket:%s File:%s Size %d\n", i, bucketName, objectName, n)
 
-	return n, nil
+	return n.Size, nil
 }

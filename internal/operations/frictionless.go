@@ -4,15 +4,15 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	minio "github.com/minio/minio-go/v7"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/minio/minio-go"
 )
 
 // FDP is the Frictionless Data Package stuct.
@@ -63,7 +63,7 @@ func DownloadPkg(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucke
 
 	// Get our package object
 	// Minio object
-	fo, err := mc.GetObject(bucket, baseobj, minio.GetObjectOptions{}) // base object should be our FDP json
+	fo, err := mc.GetObject(context.Background(), bucket, baseobj, minio.GetObjectOptions{}) // base object should be our FDP json
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -154,7 +154,7 @@ func urlPath(s string) (string, error) {
 // TODO address hard coded issues here...
 func addObject(mc *minio.Client, oid, name string, zw *zip.Writer) error {
 	// Minio object
-	fo, err := mc.GetObject("ocdprod", fmt.Sprintf("/csdco/do/%s", oid), minio.GetObjectOptions{})
+	fo, err := mc.GetObject(context.Background(), "ocdprod", fmt.Sprintf("/csdco/do/%s", oid), minio.GetObjectOptions{})
 	if err != nil {
 		fmt.Println(err)
 	}

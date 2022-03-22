@@ -3,6 +3,7 @@ package digitalobjects
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -11,9 +12,10 @@ import (
 	"strings"
 	"text/template"
 
+	minio "github.com/minio/minio-go/v7"
+
 	"github.com/fils/goobjectweb/internal/fileactions"
 	"github.com/fils/goobjectweb/internal/operations"
-	"github.com/minio/minio-go"
 )
 
 // UFOKNPageData is the struct for the template page
@@ -62,7 +64,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 
 		object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
 
-		_, err := mc.StatObject(bucket, object, minio.StatObjectOptions{})
+		_, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
 		// fmt.Println(objInfo)
 
 		if err != nil {
@@ -128,7 +130,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 	fmt.Println("Client can understand html")
 	w.Header().Set("Content-Type", "text/html")
 
-	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
+	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		log.Println("Failed to get object")
 		w.WriteHeader(http.StatusNotFound)
@@ -148,7 +150,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 	// Get the template from the site assets
 	t := fmt.Sprintf("assets/templates/%s/template.html", filepath.Dir(r.URL.Path))
 	log.Println(filepath.Dir(r.URL.Path))
-	to, err := mc.GetObject(bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
+	to, err := mc.GetObject(context.Background(), bucket, fmt.Sprintf("%s/%s", prefix, t), minio.GetObjectOptions{})
 	if err != nil {
 		log.Println("Failed to open template")
 		return err
@@ -183,7 +185,7 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 
 func sendObject(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object string) error {
 
-	fo, err := mc.GetObject(bucket, object, minio.GetObjectOptions{})
+	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
