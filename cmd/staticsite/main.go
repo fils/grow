@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/fils/goobjectweb/internal/digitalobjects"
-	log "github.com/sirupsen/logrus"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
+
+	"github.com/fils/goobjectweb/internal/digitalobjects"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fils/goobjectweb/internal/fileobjects"
 
@@ -29,9 +30,11 @@ func init() {
 	// Output to stdout instead of the default stderr. Can be any io.Writer, see below for File example
 
 	// name the file with the date and time
-	const layout = "2006-01-02-15-04-05"
-	t := time.Now()
-	lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
+	//const layout = "2006-01-02-15-04-05"
+	//t := time.Now()
+	//lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
+
+	lf := fmt.Sprint("grow.log")
 
 	LogFile := lf // log to custom file
 	logFile, err := os.OpenFile(LogFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
@@ -77,7 +80,10 @@ func main() {
 	log.Printf("a: %s  b %s  p %s d %s k %s  s %s  ssl %v \n", s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal, s3SSLVal)
 
 	// Need to convert this to gocloud.dev bloc (https://gocloud.dev/howto/blob/)
-	mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
+	//mc, err := minio.New(s3addressVal, keyVal, secretVal, s3SSLVal)
+	mc, err := minio.New(s3addressVal,
+		&minio.Options{Creds: credentials.NewStaticV4(keyVal, secretVal, ""),
+			Secure: s3SSLVal})
 	if err != nil {
 		log.Println(err)
 	}
@@ -85,6 +91,7 @@ func main() {
 	// Handler doc:   addresses the /id/* request path
 	doc := mux.NewRouter()
 	doc.PathPrefix("/id/").Handler(http.StripPrefix("/id/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, digitalobjects.DO)))
+	//doc.PathPrefix("/id/").Handler(http.StripPrefix("/", minioHandler(mc, s3bucketVal, s3prefixVal, domainVal, digitalobjects.DO)))
 	doc.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/id/", &MyServer{doc})
 

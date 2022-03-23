@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fils/goobjectweb/internal/api/graph"
 	"github.com/fils/goobjectweb/internal/api/sitemaps"
@@ -36,9 +36,10 @@ func init() {
 	// Output to stdout instead of the default stderr. Can be any io.Writer, see below for File example
 
 	// name the file with the date and time
-	const layout = "2006-01-02-15-04-05"
-	t := time.Now()
-	lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
+	//const layout = "2006-01-02-15-04-05"
+	//t := time.Now()
+	//lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
+	lf := fmt.Sprint("grow.log")
 
 	LogFile := lf // log to custom file
 	logFile, err := os.OpenFile(LogFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)

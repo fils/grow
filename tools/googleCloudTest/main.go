@@ -95,7 +95,7 @@ func main() {
 func write(client *storage.Client, bucket, object string) error {
 	// [START upload_file]
 	ctx := context.Background()
-	f, err := os.Open("notes.txt")
+	f, err := os.Open("notes.md")
 	if err != nil {
 		return err
 	}

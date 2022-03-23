@@ -34,6 +34,13 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 	// TODO add in the elseif here to check for .zip (in both sections)
 	// ten route as I do for geojson  (look to make this generic at this time?)
 
+	// TODO ocd update March 21  CSDCO
+	// caution, is this needed ??????
+	fmt.Println(prefix)
+	newprefix := strings.Replace(prefix, "website", "csdco", 1)
+	fmt.Println(newprefix)
+	prefix = newprefix
+
 	if acptHTML {
 		ext := filepath.Ext(r.URL.Path)
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
@@ -62,6 +69,12 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		// 1) check if the object exist and send it.
 		// 2) if does not exist, check if the ext matches a render version
 
+		// TODO ocd update March 21  CSDCO
+		fmt.Println(prefix)
+		newprefix := strings.Replace(prefix, "website", "csdco", 1)
+		fmt.Println(newprefix)
+		prefix = newprefix
+
 		object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
 
 		_, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
@@ -83,7 +96,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 			// 		}
 			// case "":
 
-			log.Printf("Extension: %s", ext)
+			//log.Printf("Extension: %s", ext)
 
 			if strings.Contains(ext, ".geojson") {
 				err := operations.TypeGeoJSON(mc, w, r, bucket, object)
@@ -103,7 +116,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 				jldobj := fmt.Sprintf("%s.jsonld", object)
 				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {
-					log.Println(err)
+					log.Printf("Error: %v    Object: %s", err, jldobj)
 					http.Error(w, http.StatusText(http.StatusNotFound),
 						http.StatusNotFound)
 				}
@@ -129,6 +142,8 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object, prefix string) error {
 	fmt.Println("Client can understand html")
 	w.Header().Set("Content-Type", "text/html")
+
+	fmt.Println(object)
 
 	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
