@@ -1,3 +1,4 @@
 secret/**
 cmd/server/server
 cmd/staticsite/server_static
+.idea/**
