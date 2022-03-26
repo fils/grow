@@ -28,16 +28,19 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 		key = key + "index.html"
 	}
 
+	// TODO if key has no extension, make it text/html
 	m := fileactions.MimeByType(filepath.Ext(key))
+	// TODO remove hack  (need to check if no suffic, make text/html for react)
+	m = "text/html"
 	w.Header().Set("Content-Type", m)
 	log.Printf("%s: %s \n", key, m)
 
 	// TODO ocd update March 21  CSDCO
 	// caution, is this needed ??????
 	fmt.Println(prefix)
-	newprefix := strings.Replace(prefix, "website", "csdco", 1)
-	fmt.Println(newprefix)
-	prefix = newprefix
+	//newprefix := strings.Replace(prefix, "website", "csdco", 1)
+	//fmt.Printf("New prefix: %s  old prefix: %s", newprefix, prefix)
+	//prefix = newprefix
 
 	object = fmt.Sprintf("%s/%s", prefix, key)
 	//object = fmt.Sprintf("%s/website/%s", prefix, key)
@@ -49,25 +52,22 @@ func FileObjects(mc *minio.Client, bucket, prefix, domain string, w http.Respons
 	oi, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
 	if err != nil {
 		log.Printf("Error: %v Size: %d", err, oi.Size)
-		// http.Error(w, "object not found", 404)
-		w.WriteHeader(http.StatusNotFound)
-		//return
+		//w.WriteHeader(http.StatusNotFound)
+		//http.Redirect(w, r, "/", 303) // HACK looking at react -s no -s behavior
+		// March 2022, react hack back to index.html
+		object = fmt.Sprintf("%s/%s", prefix, "index.html")
 	}
 
 	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		log.Printf("Error getobjt: %s  \n err: %s", object, err)
-		//http.Error(w, "object not found",404)
 		return
-		// if object is .hml then 404 on this.
 	}
 
 	size, err := io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
-	// log.Println(n)
 	if err != nil {
 		log.Println("Issue with writing file to http response")
 		log.Println(err)
-		// Is this an internal server error
 	}
 
 	log.Print(size)

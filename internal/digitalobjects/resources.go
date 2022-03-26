@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	log "github.com/sirupsen/logrus"
 
 	minio "github.com/minio/minio-go/v7"
 
@@ -28,18 +29,10 @@ type UFOKNPageData struct {
 // DO pulls the objects from the object store
 func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, r *http.Request) {
 
-	// GROW routing logic (what there is of it)
 	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
 
 	// TODO add in the elseif here to check for .zip (in both sections)
-	// ten route as I do for geojson  (look to make this generic at this time?)
-
-	// TODO ocd update March 21  CSDCO
-	// caution, is this needed ??????
-	fmt.Println(prefix)
-	newprefix := strings.Replace(prefix, "website", "csdco", 1)
-	fmt.Println(newprefix)
-	prefix = newprefix
+	// then route as I do for geojson  (look to make this generic at this time?)
 
 	if acptHTML {
 		ext := filepath.Ext(r.URL.Path)
@@ -70,12 +63,13 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		// 2) if does not exist, check if the ext matches a render version
 
 		// TODO ocd update March 21  CSDCO
-		fmt.Println(prefix)
-		newprefix := strings.Replace(prefix, "website", "csdco", 1)
-		fmt.Println(newprefix)
-		prefix = newprefix
+		//fmt.Println(prefix)
+		//newprefix := strings.Replace(prefix, "website", "csdco", 1)
+		//fmt.Println(newprefix)
+		//prefix = newprefix
 
-		object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
+		//object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
+		object := fmt.Sprintf("%s", r.URL.Path)
 
 		_, err := mc.StatObject(context.Background(), bucket, object, minio.StatObjectOptions{})
 		// fmt.Println(objInfo)
@@ -199,21 +193,16 @@ func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, 
 }
 
 func sendObject(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object string) error {
-
 	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
 
 	ext := filepath.Ext(object)
-
-	// log.Println(ext)
 	mime := fileactions.MimeByType(ext)
 
-	// m := fileactions.MimeByType(filepath.Ext(key))
 	w.Header().Set("Content-Type", mime) //  m)  // override for now until I update the loaded for samples earth to mod the object name with .jsonld
-
-	_, err = io.Copy(w, fo) // todo need to stream write from s3 reader...  not copy
+	_, err = io.Copy(w, fo)              // todo need to stream write from s3 reader...  not copy
 
 	return err
 }

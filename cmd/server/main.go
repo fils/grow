@@ -2,25 +2,19 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/fils/goobjectweb/internal/api/graph"
 	"github.com/fils/goobjectweb/internal/api/sitemaps"
 	"github.com/fils/goobjectweb/internal/api/tika"
 	"github.com/fils/goobjectweb/internal/digitalobjects"
 	"github.com/fils/goobjectweb/internal/fileobjects"
-
 	"github.com/gorilla/mux"
-	// "github.com/minio/minio-go/v7"
-	// minio "github.com/minio/minio-go/v7"
-
 	minio "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	log "github.com/sirupsen/logrus"
 )
 
 var s3addressVal, s3bucketVal, s3prefixVal, domainVal, keyVal, secretVal string
@@ -32,25 +26,23 @@ type MyServer struct {
 }
 
 func init() {
-
-	// Output to stdout instead of the default stderr. Can be any io.Writer, see below for File example
-
-	// name the file with the date and time
+	// name the log file with the date and time
 	//const layout = "2006-01-02-15-04-05"
 	//t := time.Now()
 	//lf := fmt.Sprintf("grow-%s.log", t.Format(layout))
-	lf := fmt.Sprint("grow.log")
 
-	LogFile := lf // log to custom file
-	logFile, err := os.OpenFile(LogFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
+	//logFile, err := os.OpenFile(lf, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
+	//if err != nil {
+	//log.Panic(err)
+	//return
+	//}
 
 	log.SetFormatter(&log.JSONFormatter{}) // Log as JSON instead of the default ASCII formatter.
 	log.SetReportCaller(true)              // include file name and line number
-	log.SetOutput(logFile)
+	//log.SetOutput(logFile)
+	log.SetOutput(os.Stdout)
+	//log.SetOutput(io.MultiWriter(logFile, os.Stdout))
+
 	flag.BoolVar(&localVal, "local", false, "Serve file local over object store, false by default")
 	flag.BoolVar(&s3SSLVal, "ssl", false, "S3 access is SSL, false by default for docker network backend")
 	flag.StringVar(&s3addressVal, "server", "0.0.0.0:0000", "Address of the object server with port")
