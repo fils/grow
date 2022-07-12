@@ -31,6 +31,10 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 
 	acptHTML := strings.Contains(r.Header.Get("Accept"), "text/html")
 
+	// TODO need to look for accept header and is appliction/ld+json then send the JSON-LD
+	//var contentTypeHeader = r.Header["Content-Type"]
+	//if contains(contentTypeHeader, "application/ld+json") || contains(contentTypeHeader, "application/json") || fileExtensionIsJson(urlloc) {
+
 	// TODO add in the elseif here to check for .zip (in both sections)
 	// then route as I do for geojson  (look to make this generic at this time?)
 
@@ -38,6 +42,14 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		ext := filepath.Ext(r.URL.Path)
 		if ext == "" || ext == ".jsonld" || ext == ".html" {
 			s := strings.TrimSuffix(r.URL.Path, ext)
+
+			// TODO ocd update March 21  CSDCO
+			// ocdprod o: website/csdco/do/bf9f63664bc66179ba65f8990ab1dd9b6e804c25dbc80cd547c3a786eac6d4fe.jsonld p:website "
+			fmt.Println(prefix)
+			newprefix := strings.Replace(prefix, "website", "", 1)
+			fmt.Println(newprefix)
+			prefix = newprefix
+
 			object := fmt.Sprintf("%s/%s.jsonld", prefix, s) // if prefix is nill?
 			log.Printf("b: %s o: %s p:%s ", bucket, object, prefix)
 			err := sendHTML(mc, w, r, bucket, object, prefix)
@@ -63,10 +75,11 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 		// 2) if does not exist, check if the ext matches a render version
 
 		// TODO ocd update March 21  CSDCO
-		//fmt.Println(prefix)
-		//newprefix := strings.Replace(prefix, "website", "csdco", 1)
-		//fmt.Println(newprefix)
-		//prefix = newprefix
+		// ocdprod o: website/csdco/do/bf9f63664bc66179ba65f8990ab1dd9b6e804c25dbc80cd547c3a786eac6d4fe.jsonld p:website "
+		fmt.Println(prefix)
+		newprefix := strings.Replace(prefix, "website", "", 1)
+		fmt.Println(newprefix)
+		prefix = newprefix
 
 		//object := fmt.Sprintf("%s/%s", prefix, r.URL.Path)
 		object := fmt.Sprintf("%s", r.URL.Path)
@@ -108,6 +121,7 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 				}
 			} else if strings.Contains(ext, "") { // a bit of a hack to see if a .jsonld exists
 				jldobj := fmt.Sprintf("%s.jsonld", object)
+				fmt.Println(jldobj)
 				err := sendObject(mc, w, r, bucket, jldobj)
 				if err != nil {
 					log.Printf("Error: %v    Object: %s", err, jldobj)
@@ -134,10 +148,10 @@ func DO(mc *minio.Client, bucket, prefix, domain string, w http.ResponseWriter, 
 }
 
 func sendHTML(mc *minio.Client, w http.ResponseWriter, r *http.Request, bucket, object, prefix string) error {
-	fmt.Println("Client can understand html")
+	log.Println("Client can understand html")
 	w.Header().Set("Content-Type", "text/html")
 
-	fmt.Println(object)
+	log.Println(object)
 
 	fo, err := mc.GetObject(context.Background(), bucket, object, minio.GetObjectOptions{})
 	if err != nil {

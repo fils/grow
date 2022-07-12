@@ -27,18 +27,3 @@ publishgcr:
 togcr: server docker tag publishgcr
 tohub: server docker dockerlatest publish
 
-# server for the static site approach (ala S3 website)
-
-server_static:
-		cd cmd/staticsite ; \
-		GOOS=linux GOARCH=amd64 CGO_ENABLED=0 env go build -o $(BINARY)_static
-
-docker_static:
-		docker build  --tag="fils/grow_static-$(GROUP):$(DOCKERVER)"  --file=./build/Dockerfile_static.yml .
-
-dockerlatest_static:
-		docker build  --tag="fils/grow_static-$(GROUP):latest"  --file=./build/Dockerfile_static.yml .
-
-publish_static:  
-		docker push fils/grow_static-$(GROUP):$(DOCKERVER)
-		docker push fils/grow_static-$(GROUP):latest
